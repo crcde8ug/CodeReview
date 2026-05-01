@@ -37,6 +37,13 @@ def create_chat_model(config: LLMConfig) -> BaseChatModel:
             base_url=config.base_url or "https://api.deepseek.com",
             temperature=config.temperature
         )
+    elif config.provider == "openrouter":
+        return ChatOpenAI(
+            model=config.model or "openai/gpt-4o-mini",
+            api_key=config.api_key,
+            base_url=config.base_url or "https://openrouter.ai/api/v1",
+            temperature=config.temperature
+        )
     elif config.provider == "zhipuai":
         # NOTE: Use a local compatibility wrapper to support multi-turn tool-calling loops.
         # Upstream langchain_community ChatZhipuAI (0.4.1) does not serialize AIMessage.tool_calls
