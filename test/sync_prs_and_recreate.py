@@ -32,18 +32,16 @@ UPSTREAM_OWNER_DEFAULT = "ai-code-review-evaluation"
 ALL_DATASET_REPOS = [
     "sentry-greptile",
     "keycloak-greptile",
-    "discourse-greptile",
     "cal.com-greptile",
-    "grafana-greptile",
 ]
-# 默认跑 5 个仓库里的 4 个（跳过 sentry）
-DEFAULT_REPOS = [r for r in ALL_DATASET_REPOS if r == "sentry-greptile"]
+
+DEFAULT_REPOS = [r for r in ALL_DATASET_REPOS]
 
 # 你的 fork 信息：默认写死为你的账号（如需覆盖，用 --fork-owner）
-FORK_OWNER_DEFAULT = "wangyue6761"
+FORK_OWNER_DEFAULT = "crcde8ug"
 
 # 你本地仓库路径：默认使用你原来的测试集根目录（如需覆盖，用 --local-root）
-LOCAL_REPO_ROOT_DEFAULT = "/Users/wangyue/Code/CodeReviewData/bottest"
+LOCAL_REPO_ROOT_DEFAULT = "D:\Desktop\projects\CodeReview\dataset"
 
 # 默认只复现 open PR；如需包含 closed，把 STATE 改成 "all"
 STATE_DEFAULT = os.environ.get("PR_STATE", "open")

@@ -168,10 +168,15 @@ class Config(BaseModel):
     @classmethod
     def _load_from_files(cls) -> "Config":
         """从标准位置加载配置文件（config.yaml/config.json/.env）。"""
+        # Also search from this file's project root (handles running from subdirectories)
+        project_root = Path(__file__).parent.parent
         config_paths = [
             Path("config.yaml"),
             Path("config.yml"),
             Path("config.json"),
+            project_root / "config.yaml",
+            project_root / "config.yml",
+            project_root / "config.json",
         ]
         
         for config_path in config_paths:

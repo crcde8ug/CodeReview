@@ -1,0 +1,100 @@
+=== cal.com ===
+  Async import of the appStore packages_Async callbacks in forEach creates unhandl
+    appstore-sync-refactor-base -> appstore-async-improvements | right=True
+    -> ### Bug: Async Callbacks in forEach Cause Unhandled Rejections  The code uses `forEach` with `async` callbacks, which causes asynchronous operations (
+
+  feat: 2fa backup codes_Backup codes not invalidated after use
+    enhance-two-factor-security-foundation -> improve-two-factor-authentication-features | right=True
+    -> _ Refactor suggestion_  **Improve component naming and type safety.**  The component is named `TwoFactor` but handles backup codes specifically. The
+    -> _ Refactor suggestion_  **Add proper accessibility connection.**  The instructions should be properly connected to the input field for screen reader
+    ... (10 total)
+
+  fix: handle collective multiple host on destinationCalendar_Null reference error
+    enhance-collective-scheduling-foundation -> fix/handle-collective-multiple-host-destinations | right=True
+    -> ### Bug: Undefined Access in Empty Array Handling  Accessing `mainHostDestinationCalendar.integration` can cause a runtime `TypeError` because `mainHo
+    -> ### Bug: Team Billing Logic Inversion  Logic inversion in organization creation: The `slug` property is now conditionally set when `IS_TEAM_BILLING_EN
+    ... (4 total)
+
+  feat: convert InsightsBookingService to use Prisma.sql raw queries_Potential SQL
+    insights-query-foundation -> insights-performance-optimization | right=True
+    -> logic: SQL condition composition logic doesn't handle the case where authConditions could be NOTHING_CONDITION - this may result in invalid SQL like `
+
+  Comprehensive workflow reminder management for booking lifecycle events_Missing 
+    workflow-queue-base -> workflow-queue-enhanced | right=True
+    -> ### Bug: Async Functions Not Awaited in Loops  Asynchronous functions `deleteScheduledEmailReminder` and `deleteScheduledSMSReminder` are called witho
+    -> ### Bug: Inconsistent Email Deletion Leaves Orphaned Records  When `immediateDelete` is true, the `deleteScheduledEmailReminder` function cancels the 
+
+  Advanced date override handling and timezone compatibility improvements_Incorrec
+    date-algorithm-base -> date-algorithm-enhanced | right=True
+    -> logic: Bug: `end` should use `slotEndTime` instead of `slotStartTime`. This will incorrectly validate working hours as both start and end use the same
+    -> logic: Potential issue: Using `===` for dayjs comparison may not work as expected. Consider using `.isSame()` method instead.  ```suggestion         i
+
+  OAuth credential sync and app integration enhancements_Timing attack vulnerabili
+    oauth-security-base -> oauth-security-enhanced | right=True
+    -> style: Consider using explicit boolean conversion `!!()` for clarity, as this currently relies on JavaScript's truthy evaluation of strings
+    -> logic: The `refreshOAuthTokens` wrapper now handles credential sync routing, but the return type may not match the expected `HubspotToken`. The utilit
+    ... (11 total)
+
+  SMS workflow reminder retry count tracking_OR condition causes deletion of all w
+    sms-retry-base -> sms-retry-enhanced | right=True
+    -> ### Bug: SMS Deletion Logic Affects All Reminder Types  The deletion logic in `scheduleSMSReminders.ts` incorrectly deletes non-SMS workflow reminders
+
+  Add guest management functionality to existing bookings_Case sensitivity bypass 
+    guest-management-base -> guest-management-enhanced | right=True
+    -> logic: Using `authedProcedure` instead of `bookingsProcedure` means this endpoint bypasses the existing booking authorization middleware in `util.ts`.
+    -> style: Consider using `.int().positive()` for more explicit booking ID validation
+    ... (9 total)
+
+  feat: add calendar cache status and actions (#22532)_Inaccurate cache status tra
+    calendar-cache-foundation -> introduce-cache-key-overflow | right=True
+    -> ### Bug: Cache Refresh Fails to Update Timestamp  The `updateManyByCredentialId` call uses an empty data object, which prevents Prisma's `@updatedAt` 
+
+=== keycloak ===
+  Fixing Re-authentication with passkeys_ConditionalPasskeysEnabled() called witho
+    improve-auth-user-experience -> enhance-passkey-authentication-flow | right=True
+    -> syntax: 'Succesful' is misspelled  ```suggestion             // Successful event - password login ```
+    -> syntax: The method `isConditionalPasskeysEnabled()` is called without parameters, but based on the parent class `UsernamePasswordForm`, it expects a `
+    ... (3 total)
+
+  Add caching support for IdentityProviderStorageProvider .getForLogin operations_
+    feature-idp-cache-baseline -> feature-idp-cache-implementation | right=True
+    -> logic: Cleanup reference uses incorrect alias - should be 'idp-alias-' + i instead of 'alias'  ```suggestion             getCleanup().addCleanup(testR
+    -> logic: Same cleanup issue - incorrect alias reference  ```suggestion         getCleanup().addCleanup(testRealm().identityProviders().get("idp-alias-20
+    ... (3 total)
+
+  Add AuthzClientCryptoProvider for authorization client cryptographic operations_
+    feature-authz-crypto-baseline -> feature-authz-crypto-implementation | right=True
+    -> logic: bit shifting could cause integer overflow for large length values, consider using Math.addExact() or similar overflow checking
+    -> logic: method lacks `default` implementation which will break existing CryptoProvider implementations that don't override this method  ```suggestion  
+    ... (5 total)
+
+  Add rolling-updates feature flag and compatibility framework_Incorrect method ca
+    feature-rolling-updates-baseline -> feature-rolling-updates-implementation | right=False
+
+  Add Client resource type and scopes to authorization schema_Inconsistent feature
+    feature-clients-authz-baseline -> feature-clients-authz-implementation | right=True
+    -> ### Bug: Inconsistent Feature Flag in Permission Cleanup  The `AdminPermissions` event listener, responsible for cleaning up permissions upon role, cl
+
+  Add Groups resource type and scopes to authorization schema_Incorrect permission
+    feature-groups-authz-baseline -> feature-groups-authz-implementation | right=True
+    -> ### Bug: Incorrect ID Usage in Group Permissions  In `GroupPermissionsV2.getGroupIdsWithViewPermission()`, `groupResource.getId()` is incorrectly used
+    -> ### Bug: Incorrect Permission Check in `canManage()` Method  The `canManage()` method incorrectly checks for `AdminPermissionsSchema.VIEW` permission 
+
+  Add HTML sanitizer for translated message resources_Lithuanian translation files
+    feature-html-sanitizer-baseline -> feature-html-sanitizer-implementation | right=True
+    -> ### Bug: Incorrect Language in Translation Files  Lithuanian translation files (`messages_lt.properties`) incorrectly use the Italian text "Installa u
+    -> ### Bug: Chinese Locale Mixes Simplified and Traditional  The `totpStep1` translation in the Simplified Chinese locale file (`messages_zh_CN.propertie
+
+  Implement access token context encoding framework_Wrong parameter in null check 
+    feature-token-context-baseline -> feature-token-context-implementation | right=True
+    -> ### Bug: Token ID Matcher Logic and Index Errors  The `isAccessTokenId` matcher in `AssertEvents.java` contains two bugs: 1.  **Incorrect substring in
+    -> ### Bug: Token Validation Error in Constructor  The `AccessTokenContext` constructor contains an incorrect null check. The `rawTokenId` parameter is n
+
+  Implement recovery key support for user storage providers_Unsafe raw List deseri
+    feature-recovery-keys-foundation -> feature-recovery-keys-implementation | right=True
+    -> ### Bug: Recovery Code Storage and Validation Issues  The `BackwardsCompatibilityUserStorage` provider incorrectly uses `input.getChallengeResponse()`
+    -> ### Bug: Unsafe Direct Access to Optional Value  Calling `Optional.get()` directly on the `Optional` returned by `RecoveryAuthnCodesUtils.getCredentia
+
+  Fix concurrent group access to prevent NullPointerException_Missing null check c
+    feature-group-concurrency-update -> feature-group-concurrency-implementation | right=True
+    -> ### Bug: Inconsistent Null Handling in GroupAdapter Methods  In the `GroupAdapter` class, `getSubGroupsCount()` now gracefully handles `null` returns 

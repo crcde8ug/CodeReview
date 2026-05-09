@@ -6,19 +6,21 @@ llm:
   # - "deepseek" → 使用 DeepSeek (默认)
   # - "zhipuai" → 使用 ZhipuAI (GLM-4)
   # - "openai" → 使用 OpenAI
+  # - "dashscope" → 使用阿里云 DashScope (Qwen)
   provider: "deepseek"  # Options: "openai", "deepseek", "zhipuai"
-  
+
   # 模型名称（根据 provider 自动选择默认值）
   # DeepSeek: "deepseek-chat"
   # ZhipuAI: "glm-4.6"
   # OpenAI: "gpt-4", "gpt-3.5-turbo" 等
+  # OpenRouter: "deepseek/deepseek-chat-v3-0324:free", "anthropic/claude-3.5-sonnet" 等
   model: "deepseek-chat"
-  
+
   # API Key (可选，可通过环境变量设置)
   # 环境变量优先级: LLM_API_KEY > provider-specific keys (DEEPSEEK_API_KEY, ZHIPUAI_API_KEY)
-  api_key: null
-  
-  # Base URL (仅用于 OpenAI 兼容的 API，如 DeepSeek)
+  api_key: null  # 填入你的 OpenRouter API key，或通过 LLM_API_KEY 环境变量设置
+
+  # Base URL (仅用于 OpenAI 兼容的 API，如 DeepSeek / OpenRouter)
   # ZhipuAI 不需要此配置
   base_url: "https://api.deepseek.com"
   
@@ -33,6 +35,7 @@ llm:
 # export LLM_PROVIDER=zhipuai  # 覆盖配置文件中的 provider
 # export LLM_MODEL=glm-4       # 覆盖配置文件中的 model
 # export LLM_API_KEY=your-key  # 覆盖配置文件中的 api_key
+# export DASHSCOPE_API_KEY=your-key  # DashScope 专用 key（provider=dashscope 时读取）
 
 system:
   workspace_root: "."           # Root directory of the workspace

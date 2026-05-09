@@ -187,6 +187,11 @@ def _parse_intent_analysis_response(response: str, file_path: str) -> FileAnalys
             intent_summary = data.get("intent_summary", response[:500])
             potential_risks_data = data.get("potential_risks", [])
             complexity_score = data.get("complexity_score")
+            if complexity_score is not None:
+                try:
+                    complexity_score = max(0.0, min(100.0, float(complexity_score)))
+                except (TypeError, ValueError):
+                    complexity_score = None
             
             # Convert potential_risks to RiskItem objects
             potential_risks = []

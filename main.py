@@ -17,6 +17,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+# Fix Windows console encoding issue
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 from core.config import Config
 from dao.factory import get_storage
 from assets.implementations.repo_map import RepoMapBuilder

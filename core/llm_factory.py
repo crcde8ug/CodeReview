@@ -3,6 +3,7 @@
 根据配置创建 LangChain 标准 ChatModel。
 """
 
+import os
 from typing import Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.language_models import BaseChatModel
@@ -31,6 +32,8 @@ def create_chat_model(config: LLMConfig) -> BaseChatModel:
         )
     elif config.provider == "deepseek":
         # DeepSeek 使用 OpenAI 兼容 API
+        # 显式禁用 reasoning 模式，避免 LangChain 不传递 reasoning_content
+        # 导致多轮对话时 DeepSeek API 报 400 错误
         return ChatOpenAI(
             model=config.model or "deepseek-chat",
             api_key=config.api_key,
@@ -42,6 +45,13 @@ def create_chat_model(config: LLMConfig) -> BaseChatModel:
             model=config.model or "openai/gpt-4o-mini",
             api_key=config.api_key,
             base_url=config.base_url or "https://openrouter.ai/api/v1",
+            temperature=config.temperature
+        )
+    elif config.provider == "dashscope":
+        return ChatOpenAI(
+            model=config.model or "qwen3.6-plus",
+            api_key=config.api_key,
+            base_url=config.base_url or "https://coding.dashscope.aliyuncs.com/v1",
             temperature=config.temperature
         )
     elif config.provider == "zhipuai":
