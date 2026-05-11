@@ -20,8 +20,10 @@ from core.config import Config
 from tools.langchain_tools import create_tools_with_context
 from agents.nodes.intent_analysis_chunked import intent_analysis_chunked_node
 from agents.nodes.intent_analysis import intent_analysis_node
+from agents.nodes.verify_loop import verify_loop_node
 from agents.nodes.manager import manager_node
 from agents.nodes.expert_execution import expert_execution_node
+from agents.nodes.eval_gate import eval_gate_node
 from agents.nodes.reporter import reporter_node
 from util.expert_stats import format_tool_call_summary
 from util.runtime_utils import ensure_run_started, elapsed_seconds, elapsed_tag, format_duration
@@ -68,46 +70,69 @@ def route_to_intent(state: ReviewState) -> str:
     return "intent_analysis"
 
 
+def _cfg_bool(cfg: Config, name: str) -> bool:
+    """从 SystemConfig 读取布尔配置项，默认 true。"""
+    try:
+        return bool(getattr(cfg.system, name, True))
+    except Exception:
+        return True
+
+
 def create_multi_agent_workflow(
     config: Config,
     enable_checkpointing: bool = False
 ) -> Any:
     """创建多智能体工作流图。
-    
+
     Args:
         config: 配置对象。
         enable_checkpointing: 是否启用 checkpointer（默认禁用）。
-    
+
     Returns:
         编译后的 LangGraph 工作流。
     """
     # Initialize LLM using factory function
     llm = create_chat_model(config.llm)
-    
+
     workspace_root = config.system.workspace_root
     asset_key = config.system.asset_key
-    
+
     langchain_tools = create_tools_with_context(
         workspace_root=workspace_root,
         asset_key=asset_key
     )
-    
+
     checkpointer = MemorySaver() if enable_checkpointing else None
-    
+
+    # Read harness flags
+    use_verify_loop = _cfg_bool(config, "harness_verify_loop_enabled")
+    use_eval_gate = _cfg_bool(config, "harness_eval_gate_enabled")
+
+    if not use_verify_loop:
+        print("  [Harness] verify_loop disabled")
+    if not use_eval_gate:
+        print("  [Harness] eval_gate disabled")
+
     # Create workflow graph
     workflow = StateGraph(ReviewState)
-    
-    # Add nodes
+
+    # Always-add nodes
     workflow.add_node("intent_router", intent_router_node)
     workflow.add_node("intent_analysis", intent_analysis_node)
     workflow.add_node("intent_analysis_chunked", intent_analysis_chunked_node)
     workflow.add_node("manager", manager_node)
     workflow.add_node("expert_execution", expert_execution_node)
     workflow.add_node("reporter", reporter_node)
-    
+
+    # Conditionally add harness nodes
+    if use_verify_loop:
+        workflow.add_node("verify_loop", verify_loop_node)
+    if use_eval_gate:
+        workflow.add_node("eval_gate", eval_gate_node)
+
     # Set entry point
     workflow.set_entry_point("intent_router")
-    
+
     # Add edges
     # Intent Router -> Intent Analysis (per-file) or Chunked Intent (conditional)
     workflow.add_conditional_edges(
@@ -119,11 +144,16 @@ def create_multi_agent_workflow(
         }
     )
 
-    # Intent Analysis -> Manager
-    workflow.add_edge("intent_analysis", "manager")
-    workflow.add_edge("intent_analysis_chunked", "manager")
-    
-    # Manager -> Expert Execution or Reporter (conditional)
+    # Intent Analysis → [verify_loop] → Manager
+    if use_verify_loop:
+        workflow.add_edge("intent_analysis", "verify_loop")
+        workflow.add_edge("intent_analysis_chunked", "verify_loop")
+        workflow.add_edge("verify_loop", "manager")
+    else:
+        workflow.add_edge("intent_analysis", "manager")
+        workflow.add_edge("intent_analysis_chunked", "manager")
+
+    # Manager → Expert Execution or Reporter (conditional)
     workflow.add_conditional_edges(
         "manager",
         route_to_experts,
@@ -132,25 +162,29 @@ def create_multi_agent_workflow(
             "reporter": "reporter"
         }
     )
-    
-    # Expert Execution -> Reporter
-    workflow.add_edge("expert_execution", "reporter")
-    
-    # Reporter -> END
+
+    # Expert Execution → [eval_gate] → Reporter
+    if use_eval_gate:
+        workflow.add_edge("expert_execution", "eval_gate")
+        workflow.add_edge("eval_gate", "reporter")
+    else:
+        workflow.add_edge("expert_execution", "reporter")
+
+    # Reporter → END
     workflow.add_edge("reporter", END)
-    
+
     # Compile workflow with checkpointer
     compile_kwargs = {}
     if checkpointer:
         compile_kwargs["checkpointer"] = checkpointer
-    
+
     compiled = workflow.compile(**compile_kwargs)
-    
+
     # Wrap nodes to inject dependencies
     return _wrap_workflow_with_dependencies(
-        compiled, 
+        compiled,
         llm,
-        config, 
+        config,
         langchain_tools
     )
 

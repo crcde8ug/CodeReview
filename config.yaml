@@ -78,3 +78,13 @@ system:
 
   # ===== Expert calibration =====
   expert_confidence_clamp_on_budget_stop: 0.55
+
+  # ===== Harness: Verify Loop =====
+  harness_verify_loop_enabled: true
+  harness_verify_confidence_floor: 0.3
+
+  # ===== Harness: Eval Gate =====
+  harness_eval_gate_enabled: true
+
+  # ===== Harness: Progressive Context =====
+  harness_progressive_context_enabled: true

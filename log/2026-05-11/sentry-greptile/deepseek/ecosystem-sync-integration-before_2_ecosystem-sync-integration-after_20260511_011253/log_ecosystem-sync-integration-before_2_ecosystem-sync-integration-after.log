@@ -1,0 +1,3083 @@
+Expert Analysis Log
+================================================================================
+Repository: sentry-greptile
+Model: deepseek
+Timestamp: 2026-05-11T01:15:49.244318
+================================================================================
+
+Worklist Summary
+================================================================================
+Total Risks: 6
+Risk Distribution:
+  - RiskType.LIFECYCLE_STATE_CONSISTENCY: 2
+  - RiskType.ROBUSTNESS_BOUNDARY_CONDITIONS: 4
+================================================================================
+
+Expert Analysis 1:
+================================================================================
+Risk Type: unknown
+File: src/sentry/models/groupassignee.py
+Line: (192, 194)
+Description: 命中模式: Lifecycle_State_Consistency-1
+在 assign 方法中，sync_group_assignee_outbound 仅在 assignee_type == 'user' 时调用，但 assignment_source 参数可能为 None，外部同步逻辑可能未处理 None 值导致静默失败。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [
+    192,
+    194
+  ],
+  "description": "原始风险描述称 assignment_source 可能为 None 导致 sync_group_assignee_outbound 静默失败，但实际代码中 sync_group_assignee_outbound (sync.py:141-143) 已通过 'assignment_source.to_dict() if assignment_source else None' 安全处理了 None 值。当 assignment_source 为 None 时，assignment_source_dict 被设为 None，不会引发异常或静默失败。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。sync_group_assignee_outbound 已正确处理 assignment_source 为 None 的情况。"
+}
+
+Risk Item:
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [
+    192,
+    194
+  ],
+  "description": "命中模式: Lifecycle_State_Consistency-1\n在 assign 方法中，sync_group_assignee_outbound 仅在 assignee_type == 'user' 时调用，但 assignment_source 参数可能为 None，外部同步逻辑可能未处理 None 值导致静默失败。",
+  "confidence": 1.0,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (8 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，让我查看 `sync_group_assignee_outbound` 函数的实现，了解它如何处理 `assignment_source` 参数。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "sync_group_assignee_outbound",
+      "include_callsites": true
+    },
+    "id": "call_00_6l1RNFFYed2h7UX3fYPa1220",
+    "type": "tool_call"
+  },
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "AssignmentSource",
+      "include_callsites": true
+    },
+    "id": "call_01_1QIXCjw4RnF1PL3TLLPw1227",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_6l1RNFFYed2h7UX3fYPa1220
+Result:
+{
+    "rev": "head",
+    "query": "sync_group_assignee_outbound",
+    "symbols": [
+        {
+            "symbol_id": "56a9a9652e37e529cf5c91bf7e9c2f8d38554bfded7e6e61ade2ae946008fffd:4252-5079",
+            "name": "sync_group_assignee_outbound",
+            "kind": "function",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+                "start_line": 123,
+                "start_col": 1,
+                "end_line": 145,
+                "end_col": 10
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "e150d2152fd0ac17bcf011193a051610019282fc147afcc194d98f03826fbeac:7498-7639",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\models\\groupassignee.py",
+                "start_line": 192,
+                "start_col": 17,
+                "end_line": 194,
+                "end_col": 18
+            }
+        },
+        {
+            "node_id": "e150d2152fd0ac17bcf011193a051610019282fc147afcc194d98f03826fbeac:9602-9734",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\models\\groupassignee.py",
+                "start_line": 238,
+                "start_col": 17,
+                "end_line": 240,
+                "end_col": 18
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1199,
+        "approx_bytes_utf8": 1199,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 4 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_01_1QIXCjw4RnF1PL3TLLPw1227
+Result:
+{
+    "rev": "head",
+    "query": "AssignmentSource",
+    "symbols": [
+        {
+            "symbol_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:367-1014",
+            "name": "AssignmentSource",
+            "kind": "type",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 15,
+                "start_col": 1,
+                "end_line": 35,
+                "end_col": 24
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:608-723",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 22,
+                "start_col": 16,
+                "end_line": 25,
+                "end_col": 10
+            }
+        },
+        {
+            "node_id": "e4883ad29fb13e4368692aadbb59987831909c759f85e0e137c87cadad856bac:881-981",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\tests\\sentry\\integrations\\services\\test_assignment_source.py",
+                "start_line": 30,
+                "start_col": 18,
+                "end_line": 33,
+                "end_col": 10
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1223,
+        "approx_bytes_utf8": 1223,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 5 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+让我读取 `sync_group_assignee_outbound` 和 `AssignmentSource` 的实现。
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+      "start_line": 123,
+      "end_line": 145
+    },
+    "id": "call_00_nVTHa9oeVuEynXeR0rCr8412",
+    "type": "tool_call"
+  },
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+      "start_line": 1,
+      "end_line": 40
+    },
+    "id": "call_01_cab9fgyMNpI9auHtVYI83020",
+    "type": "tool_call"
+  }
+]
+
+Message 6 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_nVTHa9oeVuEynXeR0rCr8412
+Result:
+{
+    "snippet": "103:     users = user_service.get_many_by_email(emails=[email], is_verified=True)\n104:     users_by_id = {user.id: user for user in users}\n105:     projects_by_user = Project.objects.get_by_users(users)\n106: \n107:     groups_assigned = []\n108:     for group in affected_groups:\n109:         user_id = get_user_id(projects_by_user, group)\n110:         user = users_by_id.get(user_id)\n111:         if user:\n112:             GroupAssignee.objects.assign(\n113:                 group,\n114:                 user,\n115:                 assignment_source=AssignmentSource.from_integration(integration),\n116:             )\n117:             groups_assigned.append(group)\n118:         else:\n119:             logger.info(\"assignee-not-found-inbound\", extra=log_context)\n120:     return groups_assigned\n121: \n122: \n123: def sync_group_assignee_outbound(\n124:     group: Group,\n125:     user_id: int | None,\n126:     assign: bool = True,\n127:     assignment_source: AssignmentSource | None = None,\n128: ) -> None:\n129:     from sentry.models.grouplink import GroupLink\n130: \n131:     external_issue_ids = GroupLink.objects.filter(\n132:         project_id=group.project_id, group_id=group.id, linked_type=GroupLink.LinkedType.issue\n133:     ).values_list(\"linked_id\", flat=True)\n134: \n135:     for external_issue_id in external_issue_ids:\n136:         sync_assignee_outbound.apply_async(\n137:             kwargs={\n138:                 \"external_issue_id\": external_issue_id,\n139:                 \"user_id\": user_id,\n140:                 \"assign\": assign,\n141:                 \"assignment_source_dict\": assignment_source.to_dict()\n142:                 if assignment_source\n143:                 else None,\n144:             }\n145:         )",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+    "range": [
+        103,
+        145
+    ],
+    "line_count": 145,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 7 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_01_cab9fgyMNpI9auHtVYI83020
+Result:
+{
+    "snippet": "1: from __future__ import annotations\n2: \n3: from dataclasses import asdict, dataclass\n4: from datetime import datetime\n5: from typing import TYPE_CHECKING, Any\n6: \n7: from django.utils import timezone\n8: \n9: if TYPE_CHECKING:\n10:     from sentry.integrations.models import Integration\n11:     from sentry.integrations.services.integration import RpcIntegration\n12: \n13: \n14: @dataclass(frozen=True)\n15: class AssignmentSource:\n16:     source_name: str\n17:     integration_id: int\n18:     queued: datetime = timezone.now()\n19: \n20:     @classmethod\n21:     def from_integration(cls, integration: Integration | RpcIntegration) -> AssignmentSource:\n22:         return AssignmentSource(\n23:             source_name=integration.name,\n24:             integration_id=integration.id,\n25:         )\n26: \n27:     def to_dict(self) -> dict[str, Any]:\n28:         return asdict(self)\n29: \n30:     @classmethod\n31:     def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:\n32:         try:\n33:             return cls(**input_dict)\n34:         except (ValueError, TypeError):\n35:             return None",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+    "range": [
+        1,
+        35
+    ],
+    "line_count": 35,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 8 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经有了足够的信息来分析这个风险项。让我总结一下：
+
+**关键发现：**
+
+1. `sync_group_assignee_outbound` 函数（sync.py:123-145）中，第141-143行明确处理了 `assignment_source` 为 `None` 的情况：
+   ```python
+   "assignment_source_dict": assignment_source.to_dict()
+   if assignment_source
+   else None,
+   ```
+   当 `assignment_source` 为 `None` 时，它安全地传递 `None`，不会崩溃。
+
+2. `AssignmentSource` 是一个简单的 frozen dataclass，`to_dict()` 方法只是调用 `asdict(self)`，没有副作用。
+
+3. 在 `assign` 方法（groupassignee.py:192-194）中，`sync_group_assignee_outbound` 仅在 `assignee_type == "user"` 时调用，这是合理的——只有用户分配才需要同步到外部集成。
+
+4. 在 `deassign` 方法（groupassignee.py:238-240）中，同样传递了 `assignment_source`，且没有 `assignee_type` 限制，这也是合理的——取消分配不区分用户/团队。
+
+**结论：** 原始风险描述称"assignment_source 参数可能为 None，外部同步逻辑可能未处理 None 值导致静默失败"——但实际代码中 `sync_group_assignee_outbound` 已经正确处理了 `None` 值（第141-143行的三元表达式）。因此这是一个误报。
+
+```json
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [192, 194],
+  "description": "原始风险描述称 assignment_source 可能为 None 导致 sync_group_assignee_outbound 静默失败，但实际代码中 sync_group_assignee_outbound (sync.py:141-143) 已通过 'assignment_source.to_dict() if assignment_source else None' 安全处理了 None 值。当 assignment_source 为 None 时，assignment_source_dict 被设为 None，不会引发异常或静默失败。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。sync_group_assignee_outbound 已正确处理 assignment_source 为 None 的情况。"
+}
+```
+
+
+Expert Analysis 2:
+================================================================================
+Risk Type: unknown
+File: src/sentry/integrations/mixins/issues.py
+Line: (390, 391)
+Description: 命中模式: Robustness_Boundary_Conditions-1
+sync_source 可能为 None，但代码直接访问 sync_source.integration_id，若 sync_source 为 None 则会抛出 AttributeError。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/mixins/issues.py",
+  "line_number": [
+    390,
+    391
+  ],
+  "description": "误报：代码在第390行使用了 `if sync_source and sync_source.integration_id == ...` 模式，其中 `sync_source and` 是显式的 None 检查卫语句。当 sync_source 为 None 时，Python 短路求值会阻止访问 `sync_source.integration_id`，不会抛出 AttributeError。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。代码已正确使用 `if sync_source and` 模式防御性地处理了 sync_source 为 None 的情况。"
+}
+
+Risk Item:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/mixins/issues.py",
+  "line_number": [
+    390,
+    391
+  ],
+  "description": "命中模式: Robustness_Boundary_Conditions-1\nsync_source 可能为 None，但代码直接访问 sync_source.integration_id，若 sync_source 为 None 则会抛出 AttributeError。",
+  "confidence": 1.0,
+  "severity": "error",
+  "suggestion": null
+}
+
+Conversation History (6 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，让我确认代码中的关键行。
+
+从 diff 和文件内容可以看到，第 390 行是：
+```python
+if sync_source and sync_source.integration_id == self.org_integration.integration_id:
+```
+
+这里已经使用了 `if sync_source and` 作为卫语句，所以当 `sync_source` 为 `None` 时，不会访问 `sync_source.integration_id`，不会抛出 `AttributeError`。
+
+让我再确认一下 `AssignmentSource` 的定义，看看它是否有其他可空性信息。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "AssignmentSource",
+      "lang": "python"
+    },
+    "id": "call_00_3I5dnF5nS4oyukS9Dv3t4287",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_3I5dnF5nS4oyukS9Dv3t4287
+Result:
+{
+    "rev": "head",
+    "query": "AssignmentSource",
+    "symbols": [
+        {
+            "symbol_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:367-1014",
+            "name": "AssignmentSource",
+            "kind": "type",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 15,
+                "start_col": 1,
+                "end_line": 35,
+                "end_col": 24
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:608-723",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 22,
+                "start_col": 16,
+                "end_line": 25,
+                "end_col": 10
+            }
+        },
+        {
+            "node_id": "e4883ad29fb13e4368692aadbb59987831909c759f85e0e137c87cadad856bac:881-981",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\tests\\sentry\\integrations\\services\\test_assignment_source.py",
+                "start_line": 30,
+                "start_col": 18,
+                "end_line": 33,
+                "end_col": 10
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1223,
+        "approx_bytes_utf8": 1223,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 4 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+      "start_line": 1,
+      "end_line": 40
+    },
+    "id": "call_00_clzcUjNkKWUvM3ABEZmy8836",
+    "type": "tool_call"
+  }
+]
+
+Message 5 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_clzcUjNkKWUvM3ABEZmy8836
+Result:
+{
+    "snippet": "1: from __future__ import annotations\n2: \n3: from dataclasses import asdict, dataclass\n4: from datetime import datetime\n5: from typing import TYPE_CHECKING, Any\n6: \n7: from django.utils import timezone\n8: \n9: if TYPE_CHECKING:\n10:     from sentry.integrations.models import Integration\n11:     from sentry.integrations.services.integration import RpcIntegration\n12: \n13: \n14: @dataclass(frozen=True)\n15: class AssignmentSource:\n16:     source_name: str\n17:     integration_id: int\n18:     queued: datetime = timezone.now()\n19: \n20:     @classmethod\n21:     def from_integration(cls, integration: Integration | RpcIntegration) -> AssignmentSource:\n22:         return AssignmentSource(\n23:             source_name=integration.name,\n24:             integration_id=integration.id,\n25:         )\n26: \n27:     def to_dict(self) -> dict[str, Any]:\n28:         return asdict(self)\n29: \n30:     @classmethod\n31:     def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:\n32:         try:\n33:             return cls(**input_dict)\n34:         except (ValueError, TypeError):\n35:             return None",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+    "range": [
+        1,
+        35
+    ],
+    "line_count": 35,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 6 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经有了完整的证据。让我分析：
+
+**可证伪断言**：`should_sync` 方法的参数 `sync_source` 类型为 `AssignmentSource | None`，在第 390 行访问 `sync_source.integration_id` 前，代码已经通过 `if sync_source and` 进行了显式的 None 检查，因此当 `sync_source` 为 `None` 时不会进入条件体，不会抛出 `AttributeError`。
+
+**反证/防御**：
+- 第 382 行：`sync_source: AssignmentSource | None = None` — 类型注解明确允许 None
+- 第 390 行：`if sync_source and sync_source.integration_id == ...` — 使用了 `sync_source and` 作为卫语句，这是 Python 中标准的判空模式
+
+**结论**：这是一个误报。代码已经正确处理了 `sync_source` 为 `None` 的情况。
+
+```json
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/mixins/issues.py",
+  "line_number": [390, 391],
+  "description": "误报：代码在第390行使用了 `if sync_source and sync_source.integration_id == ...` 模式，其中 `sync_source and` 是显式的 None 检查卫语句。当 sync_source 为 None 时，Python 短路求值会阻止访问 `sync_source.integration_id`，不会抛出 AttributeError。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。代码已正确使用 `if sync_source and` 模式防御性地处理了 sync_source 为 None 的情况。"
+}
+```
+
+
+Expert Analysis 3:
+================================================================================
+Risk Type: unknown
+File: src/sentry/models/groupassignee.py
+Line: (238, 240)
+Description: 命中模式: Lifecycle_State_Consistency-1
+在 deassign 方法中，sync_group_assignee_outbound 调用时 assignment_source 参数可能为 None，外部同步逻辑可能未处理 None 值导致静默失败。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [
+    238,
+    240
+  ],
+  "description": "经分析，sync_group_assignee_outbound 调用时 assignment_source 为 None 不会导致静默失败。sync_group_assignee_outbound (sync.py:141-143) 已通过 'assignment_source.to_dict() if assignment_source else None' 显式处理 None；下游 sync_assignee_outbound (tasks:53-55) 也通过 'AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None' 处理；should_sync (issues.py:390) 中 'if sync_source and ...' 短路求值避免访问 None.integration_id。None 是设计允许的合法值，表示无同步源信息。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。assignment_source=None 是设计允许的合法值，所有下游链路均已正确处理 None 情况。"
+}
+
+Risk Item:
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [
+    238,
+    240
+  ],
+  "description": "命中模式: Lifecycle_State_Consistency-1\n在 deassign 方法中，sync_group_assignee_outbound 调用时 assignment_source 参数可能为 None，外部同步逻辑可能未处理 None 值导致静默失败。",
+  "confidence": 1.0,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (14 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，让我查看 `sync_group_assignee_outbound` 函数的实现，了解它如何处理 `assignment_source` 参数。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "sync_group_assignee_outbound",
+      "include_callsites": true
+    },
+    "id": "call_00_MHkg9HBtyT2SDK15VeOU7680",
+    "type": "tool_call"
+  },
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "AssignmentSource",
+      "include_callsites": true
+    },
+    "id": "call_01_zmD33BAtrcgkRTJbRuTy2210",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_MHkg9HBtyT2SDK15VeOU7680
+Result:
+{
+    "rev": "head",
+    "query": "sync_group_assignee_outbound",
+    "symbols": [
+        {
+            "symbol_id": "56a9a9652e37e529cf5c91bf7e9c2f8d38554bfded7e6e61ade2ae946008fffd:4252-5079",
+            "name": "sync_group_assignee_outbound",
+            "kind": "function",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+                "start_line": 123,
+                "start_col": 1,
+                "end_line": 145,
+                "end_col": 10
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "e150d2152fd0ac17bcf011193a051610019282fc147afcc194d98f03826fbeac:7498-7639",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\models\\groupassignee.py",
+                "start_line": 192,
+                "start_col": 17,
+                "end_line": 194,
+                "end_col": 18
+            }
+        },
+        {
+            "node_id": "e150d2152fd0ac17bcf011193a051610019282fc147afcc194d98f03826fbeac:9602-9734",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\models\\groupassignee.py",
+                "start_line": 238,
+                "start_col": 17,
+                "end_line": 240,
+                "end_col": 18
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1199,
+        "approx_bytes_utf8": 1199,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 4 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_01_zmD33BAtrcgkRTJbRuTy2210
+Result:
+{
+    "rev": "head",
+    "query": "AssignmentSource",
+    "symbols": [
+        {
+            "symbol_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:367-1014",
+            "name": "AssignmentSource",
+            "kind": "type",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 15,
+                "start_col": 1,
+                "end_line": 35,
+                "end_col": 24
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:608-723",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 22,
+                "start_col": 16,
+                "end_line": 25,
+                "end_col": 10
+            }
+        },
+        {
+            "node_id": "e4883ad29fb13e4368692aadbb59987831909c759f85e0e137c87cadad856bac:881-981",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\tests\\sentry\\integrations\\services\\test_assignment_source.py",
+                "start_line": 30,
+                "start_col": 18,
+                "end_line": 33,
+                "end_col": 10
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1223,
+        "approx_bytes_utf8": 1223,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 5 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+让我读取 `sync_group_assignee_outbound` 的实现和 `AssignmentSource` 的定义。
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+      "start_line": 123,
+      "end_line": 145,
+      "context_lines": 5
+    },
+    "id": "call_00_pfnHDUVni26WLGO5SkTk0080",
+    "type": "tool_call"
+  },
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+      "start_line": 1,
+      "end_line": 40,
+      "context_lines": 5
+    },
+    "id": "call_01_7X9rNdOXJjJVKPptT1rU2384",
+    "type": "tool_call"
+  }
+]
+
+Message 6 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_pfnHDUVni26WLGO5SkTk0080
+Result:
+{
+    "snippet": "118:         else:\n119:             logger.info(\"assignee-not-found-inbound\", extra=log_context)\n120:     return groups_assigned\n121: \n122: \n123: def sync_group_assignee_outbound(\n124:     group: Group,\n125:     user_id: int | None,\n126:     assign: bool = True,\n127:     assignment_source: AssignmentSource | None = None,\n128: ) -> None:\n129:     from sentry.models.grouplink import GroupLink\n130: \n131:     external_issue_ids = GroupLink.objects.filter(\n132:         project_id=group.project_id, group_id=group.id, linked_type=GroupLink.LinkedType.issue\n133:     ).values_list(\"linked_id\", flat=True)\n134: \n135:     for external_issue_id in external_issue_ids:\n136:         sync_assignee_outbound.apply_async(\n137:             kwargs={\n138:                 \"external_issue_id\": external_issue_id,\n139:                 \"user_id\": user_id,\n140:                 \"assign\": assign,\n141:                 \"assignment_source_dict\": assignment_source.to_dict()\n142:                 if assignment_source\n143:                 else None,\n144:             }\n145:         )",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\utils\\sync.py",
+    "range": [
+        118,
+        145
+    ],
+    "line_count": 145,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 7 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_01_7X9rNdOXJjJVKPptT1rU2384
+Result:
+{
+    "snippet": "1: from __future__ import annotations\n2: \n3: from dataclasses import asdict, dataclass\n4: from datetime import datetime\n5: from typing import TYPE_CHECKING, Any\n6: \n7: from django.utils import timezone\n8: \n9: if TYPE_CHECKING:\n10:     from sentry.integrations.models import Integration\n11:     from sentry.integrations.services.integration import RpcIntegration\n12: \n13: \n14: @dataclass(frozen=True)\n15: class AssignmentSource:\n16:     source_name: str\n17:     integration_id: int\n18:     queued: datetime = timezone.now()\n19: \n20:     @classmethod\n21:     def from_integration(cls, integration: Integration | RpcIntegration) -> AssignmentSource:\n22:         return AssignmentSource(\n23:             source_name=integration.name,\n24:             integration_id=integration.id,\n25:         )\n26: \n27:     def to_dict(self) -> dict[str, Any]:\n28:         return asdict(self)\n29: \n30:     @classmethod\n31:     def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:\n32:         try:\n33:             return cls(**input_dict)\n34:         except (ValueError, TypeError):\n35:             return None",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+    "range": [
+        1,
+        35
+    ],
+    "line_count": 35,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 8 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在让我看看 `sync_assignee_outbound` 这个异步任务如何处理 `assignment_source_dict` 参数。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "sync_assignee_outbound",
+      "include_callsites": true
+    },
+    "id": "call_00_y6hr2P4w4pahtjD6ySJv3991",
+    "type": "tool_call"
+  }
+]
+
+Message 9 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_y6hr2P4w4pahtjD6ySJv3991
+Result:
+{
+    "rev": "head",
+    "query": "sync_assignee_outbound",
+    "symbols": [
+        {
+            "symbol_id": "8cd1b8cbdc7ab828b7ba466282c6c3bfa5b35698dc37b318f365fd3af86c4b63:974-2558",
+            "name": "sync_assignee_outbound",
+            "kind": "function",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\tasks\\sync_assignee_outbound.py",
+                "start_line": 30,
+                "start_col": 1,
+                "end_line": 67,
+                "end_col": 10
+            }
+        },
+        {
+            "symbol_id": "1136f3b5b369eb7928e91a427f48a1c6222de21db3a27089f8d51bbbb05571ee:14910-15302",
+            "name": "sync_assignee_outbound",
+            "kind": "function",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\mixins\\issues.py",
+                "start_line": 397,
+                "start_col": 5,
+                "end_line": 408,
+                "end_col": 34
+            }
+        }
+    ],
+    "callsites": [],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 2,
+        "symbols_returned": 2,
+        "symbols_truncated": false,
+        "callsites_total": 0,
+        "callsites_returned": 0,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 968,
+        "approx_bytes_utf8": 968,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 10 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\tasks\\sync_assignee_outbound.py",
+      "start_line": 1,
+      "end_line": 80,
+      "context_lines": 5
+    },
+    "id": "call_00_zfeq0v3kpQNLaEFOVzOv5309",
+    "type": "tool_call"
+  }
+]
+
+Message 11 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_zfeq0v3kpQNLaEFOVzOv5309
+Result:
+{
+    "snippet": "1: from typing import Any\n2: \n3: from sentry import analytics, features\n4: from sentry.integrations.models.external_issue import ExternalIssue\n5: from sentry.integrations.models.integration import Integration\n6: from sentry.integrations.services.assignment_source import AssignmentSource\n7: from sentry.integrations.services.integration import integration_service\n8: from sentry.models.organization import Organization\n9: from sentry.silo.base import SiloMode\n10: from sentry.tasks.base import instrumented_task, retry\n11: from sentry.users.models.user import User\n12: from sentry.users.services.user.service import user_service\n13: \n14: \n15: @instrumented_task(\n16:     name=\"sentry.integrations.tasks.sync_assignee_outbound\",\n17:     queue=\"integrations\",\n18:     default_retry_delay=60 * 5,\n19:     max_retries=5,\n20:     silo_mode=SiloMode.REGION,\n21: )\n22: @retry(\n23:     exclude=(\n24:         ExternalIssue.DoesNotExist,\n25:         Integration.DoesNotExist,\n26:         User.DoesNotExist,\n27:         Organization.DoesNotExist,\n28:     )\n29: )\n30: def sync_assignee_outbound(\n31:     external_issue_id: int,\n32:     user_id: int | None,\n33:     assign: bool,\n34:     assignment_source_dict: dict[str, Any] | None = None,\n35: ) -> None:\n36:     # Sync Sentry assignee to an external issue.\n37:     external_issue = ExternalIssue.objects.get(id=external_issue_id)\n38: \n39:     organization = Organization.objects.get(id=external_issue.organization_id)\n40:     has_issue_sync = features.has(\"organizations:integrations-issue-sync\", organization)\n41:     if not has_issue_sync:\n42:         return\n43:     integration = integration_service.get_integration(integration_id=external_issue.integration_id)\n44:     if not integration:\n45:         return\n46: \n47:     installation = integration.get_installation(organization_id=external_issue.organization_id)\n48:     if not (\n49:         hasattr(installation, \"should_sync\") and hasattr(installation, \"sync_assignee_outbound\")\n50:     ):\n51:         return\n52: \n53:     parsed_assignment_source = (\n54:         AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None\n55:     )\n56:     if installation.should_sync(\"outbound_assignee\", parsed_assignment_source):\n57:         # Assume unassign if None.\n58:         user = user_service.get_user(user_id) if user_id else None\n59:         installation.sync_assignee_outbound(\n60:             external_issue, user, assign=assign, assignment_source=parsed_assignment_source\n61:         )\n62:         analytics.record(\n63:             \"integration.issue.assignee.synced\",\n64:             provider=integration.provider,\n65:             id=integration.id,\n66:             organization_id=external_issue.organization_id,\n67:         )",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\tasks\\sync_assignee_outbound.py",
+    "range": [
+        1,
+        67
+    ],
+    "line_count": 67,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 12 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经有了完整的证据链。让我分析：
+
+**1. 可证伪断言**：在 `deassign` 方法中，`sync_group_assignee_outbound` 调用时 `assignment_source` 参数为 `None`，但下游 `sync_assignee_outbound` 任务中 `should_sync` 方法接收 `None` 的 `parsed_assignment_source` 可能导致静默失败。
+
+**2. 创建/写入/销毁三元组**：
+- **创建**：`assignment_source` 在 `deassign` 方法签名中定义为 `AssignmentSource | None = None`（第207行），调用时未传值 → `None`
+- **写入/传递**：`sync_group_assignee_outbound`（sync.py:141-143）中，`assignment_source.to_dict()` 仅在 `assignment_source` 非 None 时调用，否则传 `None` → 异步任务收到 `assignment_source_dict=None`
+- **消费**：`sync_assignee_outbound`（tasks:53-55）中，`AssignmentSource.from_dict(None)` 返回 `None` → `parsed_assignment_source=None`
+- **使用**：`installation.should_sync("outbound_assignee", None)`（tasks:56）
+
+**3. 关键发现**：风险描述说"外部同步逻辑可能未处理 None 值导致静默失败"，但实际代码中：
+- `sync_group_assignee_outbound` 已经正确处理了 `None` 情况（第141-143行：`assignment_source.to_dict() if assignment_source else None`）
+- `sync_assignee_outbound` 也正确处理了 `None`（第53-55行：`AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None`）
+- `should_sync` 接收 `None` 是设计允许的
+
+所以这不是一个真正的风险——`None` 值被显式处理了，不会导致静默失败。让我确认 `should_sync` 的实现。
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "def should_sync",
+      "include_patterns": [
+        "*.py"
+      ],
+      "max_results": 10
+    },
+    "id": "call_00_KXMMyfOIAbX1VQtbKaM28753",
+    "type": "tool_call"
+  }
+]
+
+Message 13 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_KXMMyfOIAbX1VQtbKaM28753
+Result:
+{
+    "matches": [
+        {
+            "file": "src\\sentry\\integrations\\mixins\\issues.py",
+            "line_number": 66,
+            "matched_line": "    def should_sync(self, attribute, sync_source: AssignmentSource | None = None):",
+            "context_start_line": 36,
+            "context_end_line": 96,
+            "context": [
+                "36: ",
+                "37: class ResolveSyncAction(enum.Enum):",
+                "38:     \"\"\"",
+                "39:     When an issue's state changes, we may have to sync the state based on the",
+                "40:     \"done\" states we get from the API. This enum encapsulates the three options",
+                "41:     we have: \"resolve\", \"unresolve\", or \"do nothing\".",
+                "42:     \"\"\"",
+                "43: ",
+                "44:     NOOP = 0",
+                "45:     RESOLVE = 1",
+                "46:     UNRESOLVE = 2",
+                "47: ",
+                "48:     @classmethod",
+                "49:     def from_resolve_unresolve(",
+                "50:         cls, should_resolve: bool, should_unresolve: bool",
+                "51:     ) -> ResolveSyncAction:",
+                "52:         if should_resolve and should_unresolve:",
+                "53:             logger.warning(\"sync-config-conflict\")",
+                "54:             return ResolveSyncAction.NOOP",
+                "55: ",
+                "56:         if should_resolve:",
+                "57:             return ResolveSyncAction.RESOLVE",
+                "58: ",
+                "59:         if should_unresolve:",
+                "60:             return ResolveSyncAction.UNRESOLVE",
+                "61: ",
+                "62:         return ResolveSyncAction.NOOP",
+                "63: ",
+                "64: ",
+                "65: class IssueBasicIntegration(IntegrationInstallation, ABC):",
+                "66:     def should_sync(self, attribute, sync_source: AssignmentSource | None = None):",
+                "67:         return False",
+                "68: ",
+                "69:     def get_group_title(self, group, event, **kwargs):",
+                "70:         return get_notification_group_title(group, event, **kwargs)",
+                "71: ",
+                "72:     @abstractmethod",
+                "73:     def get_issue_url(self, key: str) -> str:",
+                "74:         \"\"\"",
+                "75:         Given the key of the external_issue return the external issue link.",
+                "76:         \"\"\"",
+                "77:         raise NotImplementedError",
+                "78: ",
+                "79:     def get_group_body(self, group, event, **kwargs):",
+                "80:         result = []",
+                "81:         for interface in event.interfaces.values():",
+                "82:             output = safe_execute(interface.to_string, event)",
+                "83:             if output:",
+                "84:                 result.append(output)",
+                "85:         return \"\\n\\n\".join(result)",
+                "86: ",
+                "87:     def get_feedback_issue_body(self, event: GroupEvent) -> str:",
+                "88:         messages = []",
+                "89:         others = []",
+                "90:         if event.occurrence:",
+                "91:             for evidence in event.occurrence.evidence_display:",
+                "92:                 if evidence.name == \"message\":",
+                "93:                     messages.append(evidence)",
+                "94:                 else:",
+                "95:                     others.append(evidence)",
+                "96: "
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\mixins\\issues.py",
+            "line_number": 382,
+            "matched_line": "    def should_sync(self, attribute: str, sync_source: AssignmentSource | None = None) -> bool:",
+            "context_start_line": 352,
+            "context_end_line": 412,
+            "context": [
+                "352:             annotations_by_group_id[group_link.group_id].extend(annotations)",
+                "353: ",
+                "354:         return annotations_by_group_id",
+                "355: ",
+                "356:     def map_external_issues_to_annotations(self, external_issues):",
+                "357:         annotations = []",
+                "358:         for ei in external_issues:",
+                "359:             link = self.get_issue_url(ei.key)",
+                "360:             label = self.get_issue_display_name(ei) or ei.key",
+                "361:             annotations.append({\"url\": link, \"displayName\": label})",
+                "362: ",
+                "363:         return annotations",
+                "364: ",
+                "365:     def get_comment_id(self, comment):",
+                "366:         return comment[\"id\"]",
+                "367: ",
+                "368:     def create_comment(self, issue_id, user_id, group_note):",
+                "369:         pass",
+                "370: ",
+                "371:     def update_comment(self, issue_id, user_id, group_note):",
+                "372:         pass",
+                "373: ",
+                "374: ",
+                "375: class IssueSyncIntegration(IssueBasicIntegration, ABC):",
+                "376:     comment_key: ClassVar[str | None] = None",
+                "377:     outbound_status_key: ClassVar[str | None] = None",
+                "378:     inbound_status_key: ClassVar[str | None] = None",
+                "379:     outbound_assignee_key: ClassVar[str | None] = None",
+                "380:     inbound_assignee_key: ClassVar[str | None] = None",
+                "381: ",
+                "382:     def should_sync(self, attribute: str, sync_source: AssignmentSource | None = None) -> bool:",
+                "383:         key = getattr(self, f\"{attribute}_key\", None)",
+                "384:         if key is None or self.org_integration is None:",
+                "385:             return False",
+                "386: ",
+                "387:         # Check that the assignment source isn't this same integration in order to",
+                "388:         # prevent sync-cycles from occurring. This should still allow other",
+                "389:         # integrations to propagate changes outward.",
+                "390:         if sync_source and sync_source.integration_id == self.org_integration.integration_id:",
+                "391:             return False",
+                "392: ",
+                "393:         value: bool = self.org_integration.config.get(key, False)",
+                "394:         return value",
+                "395: ",
+                "396:     @abstractmethod",
+                "397:     def sync_assignee_outbound(",
+                "398:         self,",
+                "399:         external_issue: ExternalIssue,",
+                "400:         user: RpcUser | None,",
+                "401:         assign: bool = True,",
+                "402:         **kwargs: Any,",
+                "403:     ) -> None:",
+                "404:         \"\"\"",
+                "405:         Propagate a sentry issue's assignee to a linked issue's assignee.",
+                "406:         If assign=True, we're assigning the issue. Otherwise, deassign.",
+                "407:         \"\"\"",
+                "408:         raise NotImplementedError",
+                "409: ",
+                "410:     @abstractmethod",
+                "411:     def sync_status_outbound(",
+                "412:         self,"
+            ]
+        }
+    ],
+    "total": 2,
+    "truncated": false
+}
+
+Message 14 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经有了完整的证据。让我总结分析：
+
+**关键发现**：
+
+1. `sync_group_assignee_outbound`（sync.py:141-143）已经正确处理了 `assignment_source=None` 的情况：`assignment_source.to_dict() if assignment_source else None`
+2. `sync_assignee_outbound`（tasks:53-55）也正确处理了 `None`：`AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None`
+3. `should_sync`（issues.py:382-394）中，`sync_source` 为 `None` 时，第390行的 `if sync_source and ...` 短路求值，不会访问 `None.integration_id`，所以不会报错
+4. 当 `sync_source=None` 时，`should_sync` 只是正常返回 `self.org_integration.config.get(key, False)` 的值，这是设计预期的行为
+
+**结论**：原始风险描述"外部同步逻辑可能未处理 None 值导致静默失败"不成立。代码中每一层都显式处理了 `None` 值，不存在静默失败的风险。这是一个误报。
+
+```json
+{
+  "risk_type": "Lifecycle_State_Consistency",
+  "file_path": "src/sentry/models/groupassignee.py",
+  "line_number": [238, 240],
+  "description": "经分析，sync_group_assignee_outbound 调用时 assignment_source 为 None 不会导致静默失败。sync_group_assignee_outbound (sync.py:141-143) 已通过 'assignment_source.to_dict() if assignment_source else None' 显式处理 None；下游 sync_assignee_outbound (tasks:53-55) 也通过 'AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None' 处理；should_sync (issues.py:390) 中 'if sync_source and ...' 短路求值避免访问 None.integration_id。None 是设计允许的合法值，表示无同步源信息。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。assignment_source=None 是设计允许的合法值，所有下游链路均已正确处理 None 情况。"
+}
+```
+
+
+Expert Analysis 4:
+================================================================================
+Risk Type: unknown
+File: src/sentry/integrations/services/assignment_source.py
+Line: (18, 18)
+Description: 命中模式: Robustness_Boundary_Conditions-3
+queued 字段的默认值 timezone.now() 在类定义时（模块加载时）计算，而非每次实例化时计算，导致所有未显式传入 queued 的实例共享同一个时间戳。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [
+    18,
+    18
+  ],
+  "description": "Python dataclass 字段默认值 `timezone.now()` 在类定义时（模块加载时）被求值，而非每次实例化时。这导致所有未显式传入 `queued` 的 `AssignmentSource` 实例（包括通过 `from_integration()` 创建的实例）共享同一个时间戳，而非记录各自的实际创建时间。这是 Python dataclass 的经典陷阱。",
+  "confidence": 0.95,
+  "severity": "warning",
+  "suggestion": "将 `queued: datetime = timezone.now()` 改为使用 `field(default_factory=timezone.now)`：\n\n```python\nfrom dataclasses import dataclass, field\n\n@dataclass(frozen=True)\nclass AssignmentSource:\n    source_name: str\n    integration_id: int\n    queued: datetime = field(default_factory=timezone.now)\n```\n\n这样每次实例化时都会调用 `timezone.now()` 生成新的时间戳。"
+}
+
+Risk Item:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [
+    18,
+    18
+  ],
+  "description": "命中模式: Robustness_Boundary_Conditions-3\nqueued 字段的默认值 timezone.now() 在类定义时（模块加载时）计算，而非每次实例化时计算，导致所有未显式传入 queued 的实例共享同一个时间戳。",
+  "confidence": 1.0,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (2 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。核心问题是：`queued: datetime = timezone.now()` 作为 dataclass 字段的默认值，在类定义时（模块加载时）计算一次，而非每次实例化时计算。
+
+## 步骤1：可证伪断言
+
+**断言**：`AssignmentSource` 的 `queued` 字段默认值 `timezone.now()` 在类定义时（模块加载时）被求值，导致所有未显式传入 `queued` 的实例共享同一个时间戳，而非每次实例化时生成新的时间戳。
+
+## 步骤2：定位证据
+
+代码已在 diff 中完整展示，无需额外工具。关键行是第18行：
+
+```python
+queued: datetime = timezone.now()
+```
+
+这是 Python `dataclass` 的一个经典陷阱。根据 Python 官方文档，dataclass 字段的默认值在类定义时被求值一次。对于可变默认值，Python 3.11+ 会通过 `field(default_factory=...)` 机制警告，但对于 `timezone.now()` 这种"看起来不可变"的调用，Python 不会报错，但行为仍然是错误的。
+
+## 步骤3：寻找反证
+
+检查代码中是否有防御措施：
+
+1. **`from_integration` 类方法**（第21-25行）：调用 `AssignmentSource(...)` 时未传入 `queued`，因此会使用默认值。这证实了问题——所有通过 `from_integration` 创建的实例在同一个进程内会共享相同的时间戳。
+
+2. **`from_dict` 类方法**（第31-35行）：从字典创建时，如果字典包含 `queued` 键则会使用传入值，否则也会使用默认值。
+
+3. **没有使用 `field(default_factory=timezone.now)`**：这是 Python 官方推荐的解决方式，但代码中没有使用。
+
+4. **`@dataclass(frozen=True)`**：frozen dataclass 意味着实例不可变，但这不影响默认值求值时机问题。
+
+**结论**：没有找到反证。这是一个真实的 Python dataclass 默认值陷阱。
+
+## 置信度评估
+
+- 这是 Python dataclass 的已知陷阱，有明确的官方文档说明。
+- 代码中没有任何防御措施（如 `field(default_factory=...)`）。
+- 所有通过 `from_integration` 创建的实例都会受影响。
+- 置信度：**0.95**（直接代码证据 + 无反证）
+
+```json
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [18, 18],
+  "description": "Python dataclass 字段默认值 `timezone.now()` 在类定义时（模块加载时）被求值，而非每次实例化时。这导致所有未显式传入 `queued` 的 `AssignmentSource` 实例（包括通过 `from_integration()` 创建的实例）共享同一个时间戳，而非记录各自的实际创建时间。这是 Python dataclass 的经典陷阱。",
+  "confidence": 0.95,
+  "severity": "warning",
+  "suggestion": "将 `queued: datetime = timezone.now()` 改为使用 `field(default_factory=timezone.now)`：\n\n```python\nfrom dataclasses import dataclass, field\n\n@dataclass(frozen=True)\nclass AssignmentSource:\n    source_name: str\n    integration_id: int\n    queued: datetime = field(default_factory=timezone.now)\n```\n\n这样每次实例化时都会调用 `timezone.now()` 生成新的时间戳。"
+}
+```
+
+
+Expert Analysis 5:
+================================================================================
+Risk Type: unknown
+File: src/sentry/integrations/utils/sync.py
+Line: (141, 141)
+Description: 命中模式: 裸露的链式调用
+assignment_source.to_dict() 在 assignment_source 为 None 时不会执行，但若 assignment_source 对象缺少 to_dict 方法或该方法抛出异常，将导致未处理的运行时错误。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/utils/sync.py",
+  "line_number": [
+    141,
+    143
+  ],
+  "description": "代码已通过 `if assignment_source` 三目运算符（第141-143行）对 `assignment_source` 参数进行了判空保护。当 `assignment_source` 为 None 时，传入 None；非 None 时才调用 `to_dict()`。`AssignmentSource.to_dict()` 方法（assignment_source.py:27-28）仅调用 `dataclasses.asdict(self)`，对 frozen dataclass 不会抛出异常。因此不存在裸露链式调用的风险。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修改，当前防御性编程已足够。"
+}
+
+Risk Item:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/utils/sync.py",
+  "line_number": [
+    141,
+    141
+  ],
+  "description": "命中模式: 裸露的链式调用\nassignment_source.to_dict() 在 assignment_source 为 None 时不会执行，但若 assignment_source 对象缺少 to_dict 方法或该方法抛出异常，将导致未处理的运行时错误。",
+  "confidence": 1.0,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (6 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，让我查看 `AssignmentSource` 类的定义，确认 `to_dict()` 方法的行为。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "AssignmentSource",
+      "include_callsites": true
+    },
+    "id": "call_00_ytN25ToyFUzrTaTQeZOL5507",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_ytN25ToyFUzrTaTQeZOL5507
+Result:
+{
+    "rev": "head",
+    "query": "AssignmentSource",
+    "symbols": [
+        {
+            "symbol_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:367-1014",
+            "name": "AssignmentSource",
+            "kind": "type",
+            "lang": "python",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 15,
+                "start_col": 1,
+                "end_line": 35,
+                "end_col": 24
+            }
+        }
+    ],
+    "callsites": [
+        {
+            "node_id": "80259f136b1e12c7ec1ec01d34a768a25a6cefcad2e0bd75dc49f35852d8796d:608-723",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+                "start_line": 22,
+                "start_col": 16,
+                "end_line": 25,
+                "end_col": 10
+            }
+        },
+        {
+            "node_id": "e4883ad29fb13e4368692aadbb59987831909c759f85e0e137c87cadad856bac:881-981",
+            "kind": "callsite",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\tests\\sentry\\integrations\\services\\test_assignment_source.py",
+                "start_line": 30,
+                "start_col": 18,
+                "end_line": 33,
+                "end_col": 10
+            }
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 2,
+        "callsites_returned": 2,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 1223,
+        "approx_bytes_utf8": 1223,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 4 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+      "start_line": 1,
+      "end_line": 40
+    },
+    "id": "call_00_0IO8Jmo0KSMjUY8bojhl5337",
+    "type": "tool_call"
+  }
+]
+
+Message 5 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_0IO8Jmo0KSMjUY8bojhl5337
+Result:
+{
+    "snippet": "1: from __future__ import annotations\n2: \n3: from dataclasses import asdict, dataclass\n4: from datetime import datetime\n5: from typing import TYPE_CHECKING, Any\n6: \n7: from django.utils import timezone\n8: \n9: if TYPE_CHECKING:\n10:     from sentry.integrations.models import Integration\n11:     from sentry.integrations.services.integration import RpcIntegration\n12: \n13: \n14: @dataclass(frozen=True)\n15: class AssignmentSource:\n16:     source_name: str\n17:     integration_id: int\n18:     queued: datetime = timezone.now()\n19: \n20:     @classmethod\n21:     def from_integration(cls, integration: Integration | RpcIntegration) -> AssignmentSource:\n22:         return AssignmentSource(\n23:             source_name=integration.name,\n24:             integration_id=integration.id,\n25:         )\n26: \n27:     def to_dict(self) -> dict[str, Any]:\n28:         return asdict(self)\n29: \n30:     @classmethod\n31:     def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:\n32:         try:\n33:             return cls(**input_dict)\n34:         except (ValueError, TypeError):\n35:             return None",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\sentry-greptile\\src\\sentry\\integrations\\services\\assignment_source.py",
+    "range": [
+        1,
+        35
+    ],
+    "line_count": 35,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 6 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经获得了完整的上下文。让我分析：
+
+**可证伪断言**：`sync_group_assignee_outbound` 函数中，参数 `assignment_source` 类型为 `AssignmentSource | None`（第127行），在第141行通过 `if assignment_source` 进行了判空保护，因此 `assignment_source.to_dict()` 仅在非 None 时调用，不会出现 `None.to_dict()` 的 AttributeError。
+
+**证据分析**：
+1. 第127行：`assignment_source: AssignmentSource | None = None` — 明确声明可为 None
+2. 第141-143行：`assignment_source.to_dict() if assignment_source else None` — 三目运算符，先判断非 None 再调用 `.to_dict()`
+3. `AssignmentSource.to_dict()` 方法（第27-28行）只是调用 `asdict(self)`，这是一个标准库 `dataclasses.asdict` 调用，不会抛出异常（除非 dataclass 字段本身有问题，但字段都是基本类型：str, int, datetime）
+
+**反证/防御**：
+- 第141行有明确的卫语句 `if assignment_source`，确保 `to_dict()` 仅在非 None 时调用
+- 当 `assignment_source` 为 None 时，传入 `None` 作为 `assignment_source_dict` 的值
+
+**结论**：原始风险描述提到"assignment_source 为 None 时不会执行"是正确的，但代码已经通过 `if assignment_source` 做了防御。风险描述中"若 assignment_source 对象缺少 to_dict 方法或该方法抛出异常"——`to_dict` 是 `AssignmentSource` 类定义的方法，类型系统保证存在；`asdict` 是标准库调用，对 frozen dataclass 不会抛出异常。
+
+这是一个**误报**，代码已经正确处理了边界条件。
+
+```json
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/utils/sync.py",
+  "line_number": [141, 143],
+  "description": "代码已通过 `if assignment_source` 三目运算符（第141-143行）对 `assignment_source` 参数进行了判空保护。当 `assignment_source` 为 None 时，传入 None；非 None 时才调用 `to_dict()`。`AssignmentSource.to_dict()` 方法（assignment_source.py:27-28）仅调用 `dataclasses.asdict(self)`，对 frozen dataclass 不会抛出异常。因此不存在裸露链式调用的风险。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修改，当前防御性编程已足够。"
+}
+```
+
+
+Expert Analysis 6:
+================================================================================
+Risk Type: unknown
+File: src/sentry/integrations/services/assignment_source.py
+Line: (31, 35)
+Description: 命中模式: Robustness_Boundary_Conditions-1
+from_dict 方法捕获 ValueError 和 TypeError，但未处理 KeyError（当 input_dict 缺少必需字段时），可能导致未捕获的异常。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [
+    31,
+    35
+  ],
+  "description": "误报：from_dict 方法使用 cls(**input_dict) 构造 dataclass，当 input_dict 缺少必需字段（source_name/integration_id）时，Python dataclass 抛出 TypeError（'missing required positional argument'），而非 KeyError。当前 except (ValueError, TypeError) 已正确捕获该异常。测试文件 test_assignment_source.py 第8-11行（空 dict）和第13-19行（无效字段）已验证此行为，均返回 None。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修改。当前异常处理已覆盖所有边界情况。如需更精确的错误区分，可考虑分别处理 ValueError 和 TypeError，但当前统一返回 None 的设计是合理的。"
+}
+
+Risk Item:
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [
+    31,
+    35
+  ],
+  "description": "命中模式: Robustness_Boundary_Conditions-1\nfrom_dict 方法捕获 ValueError 和 TypeError，但未处理 KeyError（当 input_dict 缺少必需字段时），可能导致未捕获的异常。",
+  "confidence": 1.0,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (6 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，让我仔细阅读代码，然后进行验证。
+
+## 步骤1：可证伪断言
+
+**断言**：`from_dict` 方法（第31-35行）在 `input_dict` 缺少 `AssignmentSource` 的必需字段（`source_name` 或 `integration_id`）时，`cls(**input_dict)` 会抛出 `KeyError` 或 `TypeError`，但当前只捕获了 `ValueError` 和 `TypeError`，未捕获 `KeyError`，导致异常逃逸。
+
+让我先确认 `dataclass` 在缺少必需字段时的行为。
+
+## 步骤2：分析代码
+
+从代码中可以看到：
+
+1. `AssignmentSource` 是一个 `@dataclass(frozen=True)`，有三个字段：
+   - `source_name: str` — 无默认值，必需
+   - `integration_id: int` — 无默认值，必需
+   - `queued: datetime = timezone.now()` — 有默认值，可选
+
+2. `from_dict` 方法（第31-35行）：
+   ```python
+   @classmethod
+   def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:
+       try:
+           return cls(**input_dict)
+       except (ValueError, TypeError):
+           return None
+   ```
+
+当 `input_dict` 缺少 `source_name` 或 `integration_id` 时，`cls(**input_dict)` 会抛出 `TypeError`（因为 `__init__` 缺少必需的位置参数），而不是 `KeyError`。Python 的 dataclass `__init__` 在缺少必需参数时抛出 `TypeError`。
+
+让我验证一下这个理解——Python dataclass 在缺少必需字段时到底抛什么异常。
+
+实际上，Python 的 `dataclass` 生成的 `__init__` 在缺少必需参数时会抛出 `TypeError`（"missing required positional argument"），而不是 `KeyError`。所以 `TypeError` 已经被捕获了。
+
+但风险描述提到的是 `KeyError`——当 `input_dict` 包含额外字段时，`cls(**input_dict)` 会怎样？Python dataclass 默认 `__init__` 不接受未知关键字参数，会抛出 `TypeError`（"unexpected keyword argument"），这也被捕获了。
+
+让我再想想——风险描述说"当 input_dict 缺少必需字段时，可能导致未捕获的异常"。实际上，缺少必需字段时 dataclass 抛 `TypeError`，这已经被捕获了。
+
+但等等，让我检查一下 `dataclass` 的 `__init__` 行为是否可能抛出 `KeyError`。实际上，`cls(**input_dict)` 是关键字参数解包，如果 `input_dict` 是一个普通 dict，缺少键时不会触发 `KeyError`——`**input_dict` 只是传递了 dict 中存在的键。如果缺少必需参数，Python 解释器会在函数调用时抛出 `TypeError`。
+
+所以，`TypeError` 已经被捕获了。让我确认一下是否有其他场景会导致 `KeyError`。
+
+实际上，`cls(**input_dict)` 本身不会抛出 `KeyError`。`KeyError` 只会在你显式访问 `input_dict['some_key']` 时发生。这里用的是 `**input_dict` 解包，所以不会触发 `KeyError`。
+
+因此，这个风险项可能是一个误报。让我再检查一下是否有其他调用方或使用模式。
+
+让我搜索一下 `from_dict` 的调用方，看看是否有其他上下文。
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "from_dict",
+      "include_patterns": [
+        "*.py"
+      ],
+      "max_results": 20
+    },
+    "id": "call_00_UefXCSvRrTy7W4npEIdK2220",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_UefXCSvRrTy7W4npEIdK2220
+Result:
+{
+    "matches": [
+        {
+            "file": "src\\sentry\\dynamic_sampling\\tasks\\task_context.py",
+            "line_number": 48,
+            "matched_line": "    def from_dict(val: dict[Any, Any] | None) -> \"DynamicSamplingLogState\":",
+            "context_start_line": 18,
+            "context_end_line": 78,
+            "context": [
+                "18:     num_orgs: int = 0",
+                "19:     execution_time: float = 0.0",
+                "20: ",
+                "21:     def to_dict(self) -> dict[str, int | float]:",
+                "22:         return {",
+                "23:             \"numRowsTotal\": self.num_rows_total,",
+                "24:             \"numDbCalls\": self.num_db_calls,",
+                "25:             \"numIterations\": self.num_iterations,",
+                "26:             \"numProjects\": self.num_projects,",
+                "27:             \"numOrgs\": self.num_orgs,",
+                "28:             \"executionTime\": self.execution_time,",
+                "29:         }",
+                "30: ",
+                "31:     def increment(",
+                "32:         self,",
+                "33:         num_rows_total: int = 0,",
+                "34:         num_db_calls: int = 0,",
+                "35:         num_iterations: int = 0,",
+                "36:         num_projects: int = 0,",
+                "37:         num_orgs: int = 0,",
+                "38:     ) -> \"DynamicSamplingLogState\":",
+                "39:         self.num_rows_total += num_rows_total",
+                "40:         self.num_db_calls += num_db_calls",
+                "41:         self.num_iterations += num_iterations",
+                "42:         self.num_projects += num_projects",
+                "43:         self.num_orgs += num_orgs",
+                "44: ",
+                "45:         return self",
+                "46: ",
+                "47:     @staticmethod",
+                "48:     def from_dict(val: dict[Any, Any] | None) -> \"DynamicSamplingLogState\":",
+                "49:         if val is not None:",
+                "50:             return DynamicSamplingLogState(",
+                "51:                 num_iterations=val.get(\"numIterations\", 0),",
+                "52:                 num_db_calls=val.get(\"numDbCalls\", 0),",
+                "53:                 num_rows_total=val.get(\"numRowsTotal\", 0),",
+                "54:                 num_projects=val.get(\"numProjects\", 0),",
+                "55:                 num_orgs=val.get(\"numOrgs\", 0),",
+                "56:                 execution_time=val.get(\"executionTime\", 0.0),",
+                "57:             )",
+                "58:         else:",
+                "59:             return DynamicSamplingLogState()",
+                "60: ",
+                "61: ",
+                "62: @dataclass",
+                "63: class TaskContext:",
+                "64:     \"\"\"",
+                "65:     Keeps information about a running task",
+                "66: ",
+                "67:     * the name",
+                "68:     * the amount of time is allowed to run (until a TimeoutError should be emitted)",
+                "69:     * stats about the task operation (how many items it has processed) used for logging",
+                "70:     * keeps a Timers object that manages multiple named timers for tracking execution time of functions.",
+                "71:     \"\"\"",
+                "72: ",
+                "73:     name: str",
+                "74:     num_seconds: float",
+                "75:     context_data: dict[str, DynamicSamplingLogState] | None = None",
+                "76: ",
+                "77:     def __post_init__(self):",
+                "78:         # always override"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\integration.py",
+            "line_number": 919,
+            "matched_line": "                JiraIssueTypeMetadata.from_dict(issue_type_meta), data",
+            "context_start_line": 889,
+            "context_end_line": 949,
+            "context": [
+                "889:             cleaned_data[\"issuetype\"] = {\"id\": cleaned_data[\"issuetype\"]}",
+                "890:         return cleaned_data",
+                "891: ",
+                "892:     def _clean_and_transform_issue_data(",
+                "893:         self, issue_metadata: JiraIssueTypeMetadata, data: dict[str, Any]",
+                "894:     ) -> Any:",
+                "895:         client = self.get_client()",
+                "896:         transformed_data = transform_fields(",
+                "897:             client.user_id_field(), issue_metadata.fields.values(), **data",
+                "898:         )",
+                "899:         return transformed_data",
+                "900: ",
+                "901:     def create_issue(self, data, **kwargs):",
+                "902:         client = self.get_client()",
+                "903:         # protect against mis-configured integration submitting a form without an",
+                "904:         # issuetype assigned.",
+                "905:         if not data.get(\"issuetype\"):",
+                "906:             raise IntegrationFormError({\"issuetype\": [\"Issue type is required.\"]})",
+                "907: ",
+                "908:         jira_project = data.get(\"project\")",
+                "909:         if not jira_project:",
+                "910:             raise IntegrationFormError({\"project\": [\"Jira project is required\"]})",
+                "911: ",
+                "912:         meta = client.get_create_meta_for_project(jira_project)",
+                "913:         if not meta:",
+                "914:             raise IntegrationError(\"Could not fetch issue create configuration from Jira.\")",
+                "915: ",
+                "916:         issue_type_meta = self.get_issue_type_meta(data[\"issuetype\"], meta)",
+                "917:         if features.has(\"organizations:new-jira-transformers\", organization=self.organization):",
+                "918:             cleaned_data = self._clean_and_transform_issue_data(",
+                "919:                 JiraIssueTypeMetadata.from_dict(issue_type_meta), data",
+                "920:             )",
+                "921:         else:",
+                "922:             cleaned_data = self._old_clean_and_transform_issue_data(data, issue_type_meta)",
+                "923: ",
+                "924:         try:",
+                "925:             response = client.create_issue(cleaned_data)",
+                "926:         except Exception as e:",
+                "927:             self.raise_error(e)",
+                "928: ",
+                "929:         issue_key = response.get(\"key\")",
+                "930:         if not issue_key:",
+                "931:             raise IntegrationError(\"There was an error creating the issue.\")",
+                "932: ",
+                "933:         # Immediately fetch and return the created issue.",
+                "934:         return self.get_issue(issue_key)",
+                "935: ",
+                "936:     def sync_assignee_outbound(",
+                "937:         self,",
+                "938:         external_issue: ExternalIssue,",
+                "939:         user: RpcUser | None,",
+                "940:         assign: bool = True,",
+                "941:         **kwargs: Any,",
+                "942:     ) -> None:",
+                "943:         \"\"\"",
+                "944:         Propagate a sentry issue's assignee to a jira issue's assignee",
+                "945:         \"\"\"",
+                "946:         client = self.get_client()",
+                "947:         jira_user = None",
+                "948:         if user and assign:",
+                "949:             for ue in user.emails:"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 74,
+            "matched_line": "    def from_dict(cls, data: dict[str, Any]) -> JiraSchema:",
+            "context_start_line": 44,
+            "context_end_line": 104,
+            "context": [
+                "44:     - string",
+                "45:     - array (has a corresponding `items` field with its subtype)",
+                "46:     - user",
+                "47:     - issuetype",
+                "48:     - issuelink",
+                "49:     - project (and PROJECT)",
+                "50:     - date",
+                "51:     - team",
+                "52:     - any",
+                "53:     \"\"\"",
+                "54:     custom: str | None = None",
+                "55:     \"\"\"",
+                "56:     The very long custom field name corresponding to some namespace, plugin,",
+                "57:     and custom field name.",
+                "58:     \"\"\"",
+                "59:     custom_id: int | None = None",
+                "60:     \"\"\"",
+                "61:     A unique identifier for a field on an issue, in the form of 'customfield_<int>'",
+                "62:     \"\"\"",
+                "63:     system: str | None = None",
+                "64:     \"\"\"",
+                "65:     TODO(Gabe): Figure out what this is used for",
+                "66:     \"\"\"",
+                "67:     items: str | None = None",
+                "68:     \"\"\"",
+                "69:     Specifies the subtype for aggregate type, such as `array`. For any",
+                "70:     non-aggregate types, this will be None",
+                "71:     \"\"\"",
+                "72: ",
+                "73:     @classmethod",
+                "74:     def from_dict(cls, data: dict[str, Any]) -> JiraSchema:",
+                "75:         schema_type = data[\"type\"]",
+                "76:         custom = data.get(\"custom\")",
+                "77:         custom_id = data.get(\"custom_id\")",
+                "78:         system = data.get(\"system\")",
+                "79:         items = data.get(\"items\")",
+                "80: ",
+                "81:         return cls(",
+                "82:             schema_type=schema_type, custom=custom, custom_id=custom_id, system=system, items=items",
+                "83:         )",
+                "84: ",
+                "85:     @classmethod",
+                "86:     def from_dict_list(cls, data: list[dict[str, Any]]) -> list[JiraSchema]:",
+                "87:         return [cls.from_dict(item) for item in data]",
+                "88: ",
+                "89: ",
+                "90: @dataclass(frozen=True)",
+                "91: class JiraField:",
+                "92:     \"\"\"",
+                "93:     Represents a Jira Issue Field, which is queried directly via Jira's issue",
+                "94:     creation metadata API:",
+                "95:     https://developer.atlassian.com/server/jira/platform/rest/v10000/api-group-issue/#api-api-2-issue-createmeta-projectidorkey-issuetypes-issuetypeid-get",
+                "96:     \"\"\"",
+                "97: ",
+                "98:     required: bool",
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: "
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 86,
+            "matched_line": "    def from_dict_list(cls, data: list[dict[str, Any]]) -> list[JiraSchema]:",
+            "context_start_line": 56,
+            "context_end_line": 116,
+            "context": [
+                "56:     The very long custom field name corresponding to some namespace, plugin,",
+                "57:     and custom field name.",
+                "58:     \"\"\"",
+                "59:     custom_id: int | None = None",
+                "60:     \"\"\"",
+                "61:     A unique identifier for a field on an issue, in the form of 'customfield_<int>'",
+                "62:     \"\"\"",
+                "63:     system: str | None = None",
+                "64:     \"\"\"",
+                "65:     TODO(Gabe): Figure out what this is used for",
+                "66:     \"\"\"",
+                "67:     items: str | None = None",
+                "68:     \"\"\"",
+                "69:     Specifies the subtype for aggregate type, such as `array`. For any",
+                "70:     non-aggregate types, this will be None",
+                "71:     \"\"\"",
+                "72: ",
+                "73:     @classmethod",
+                "74:     def from_dict(cls, data: dict[str, Any]) -> JiraSchema:",
+                "75:         schema_type = data[\"type\"]",
+                "76:         custom = data.get(\"custom\")",
+                "77:         custom_id = data.get(\"custom_id\")",
+                "78:         system = data.get(\"system\")",
+                "79:         items = data.get(\"items\")",
+                "80: ",
+                "81:         return cls(",
+                "82:             schema_type=schema_type, custom=custom, custom_id=custom_id, system=system, items=items",
+                "83:         )",
+                "84: ",
+                "85:     @classmethod",
+                "86:     def from_dict_list(cls, data: list[dict[str, Any]]) -> list[JiraSchema]:",
+                "87:         return [cls.from_dict(item) for item in data]",
+                "88: ",
+                "89: ",
+                "90: @dataclass(frozen=True)",
+                "91: class JiraField:",
+                "92:     \"\"\"",
+                "93:     Represents a Jira Issue Field, which is queried directly via Jira's issue",
+                "94:     creation metadata API:",
+                "95:     https://developer.atlassian.com/server/jira/platform/rest/v10000/api-group-issue/#api-api-2-issue-createmeta-projectidorkey-issuetypes-issuetypeid-get",
+                "96:     \"\"\"",
+                "97: ",
+                "98:     required: bool",
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: "
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 87,
+            "matched_line": "        return [cls.from_dict(item) for item in data]",
+            "context_start_line": 57,
+            "context_end_line": 117,
+            "context": [
+                "57:     and custom field name.",
+                "58:     \"\"\"",
+                "59:     custom_id: int | None = None",
+                "60:     \"\"\"",
+                "61:     A unique identifier for a field on an issue, in the form of 'customfield_<int>'",
+                "62:     \"\"\"",
+                "63:     system: str | None = None",
+                "64:     \"\"\"",
+                "65:     TODO(Gabe): Figure out what this is used for",
+                "66:     \"\"\"",
+                "67:     items: str | None = None",
+                "68:     \"\"\"",
+                "69:     Specifies the subtype for aggregate type, such as `array`. For any",
+                "70:     non-aggregate types, this will be None",
+                "71:     \"\"\"",
+                "72: ",
+                "73:     @classmethod",
+                "74:     def from_dict(cls, data: dict[str, Any]) -> JiraSchema:",
+                "75:         schema_type = data[\"type\"]",
+                "76:         custom = data.get(\"custom\")",
+                "77:         custom_id = data.get(\"custom_id\")",
+                "78:         system = data.get(\"system\")",
+                "79:         items = data.get(\"items\")",
+                "80: ",
+                "81:         return cls(",
+                "82:             schema_type=schema_type, custom=custom, custom_id=custom_id, system=system, items=items",
+                "83:         )",
+                "84: ",
+                "85:     @classmethod",
+                "86:     def from_dict_list(cls, data: list[dict[str, Any]]) -> list[JiraSchema]:",
+                "87:         return [cls.from_dict(item) for item in data]",
+                "88: ",
+                "89: ",
+                "90: @dataclass(frozen=True)",
+                "91: class JiraField:",
+                "92:     \"\"\"",
+                "93:     Represents a Jira Issue Field, which is queried directly via Jira's issue",
+                "94:     creation metadata API:",
+                "95:     https://developer.atlassian.com/server/jira/platform/rest/v10000/api-group-issue/#api-api-2-issue-createmeta-projectidorkey-issuetypes-issuetypeid-get",
+                "96:     \"\"\"",
+                "97: ",
+                "98:     required: bool",
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: ",
+                "117:         schema = JiraSchema.from_dict(raw_schema)"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 109,
+            "matched_line": "    def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+            "context_start_line": 79,
+            "context_end_line": 139,
+            "context": [
+                "79:         items = data.get(\"items\")",
+                "80: ",
+                "81:         return cls(",
+                "82:             schema_type=schema_type, custom=custom, custom_id=custom_id, system=system, items=items",
+                "83:         )",
+                "84: ",
+                "85:     @classmethod",
+                "86:     def from_dict_list(cls, data: list[dict[str, Any]]) -> list[JiraSchema]:",
+                "87:         return [cls.from_dict(item) for item in data]",
+                "88: ",
+                "89: ",
+                "90: @dataclass(frozen=True)",
+                "91: class JiraField:",
+                "92:     \"\"\"",
+                "93:     Represents a Jira Issue Field, which is queried directly via Jira's issue",
+                "94:     creation metadata API:",
+                "95:     https://developer.atlassian.com/server/jira/platform/rest/v10000/api-group-issue/#api-api-2-issue-createmeta-projectidorkey-issuetypes-issuetypeid-get",
+                "96:     \"\"\"",
+                "97: ",
+                "98:     required: bool",
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: ",
+                "117:         schema = JiraSchema.from_dict(raw_schema)",
+                "118: ",
+                "119:         return cls(",
+                "120:             required=required,",
+                "121:             name=name,",
+                "122:             key=key,",
+                "123:             schema=schema,",
+                "124:             operations=operations,",
+                "125:             has_default_value=has_default_value,",
+                "126:         )",
+                "127: ",
+                "128:     @classmethod",
+                "129:     def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+                "130:         return {key: cls.from_dict(val) for key, val in data.items()}",
+                "131: ",
+                "132:     def get_field_type(self) -> JiraSchemaTypes | None:",
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: "
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 117,
+            "matched_line": "        schema = JiraSchema.from_dict(raw_schema)",
+            "context_start_line": 87,
+            "context_end_line": 147,
+            "context": [
+                "87:         return [cls.from_dict(item) for item in data]",
+                "88: ",
+                "89: ",
+                "90: @dataclass(frozen=True)",
+                "91: class JiraField:",
+                "92:     \"\"\"",
+                "93:     Represents a Jira Issue Field, which is queried directly via Jira's issue",
+                "94:     creation metadata API:",
+                "95:     https://developer.atlassian.com/server/jira/platform/rest/v10000/api-group-issue/#api-api-2-issue-createmeta-projectidorkey-issuetypes-issuetypeid-get",
+                "96:     \"\"\"",
+                "97: ",
+                "98:     required: bool",
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: ",
+                "117:         schema = JiraSchema.from_dict(raw_schema)",
+                "118: ",
+                "119:         return cls(",
+                "120:             required=required,",
+                "121:             name=name,",
+                "122:             key=key,",
+                "123:             schema=schema,",
+                "124:             operations=operations,",
+                "125:             has_default_value=has_default_value,",
+                "126:         )",
+                "127: ",
+                "128:     @classmethod",
+                "129:     def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+                "130:         return {key: cls.from_dict(val) for key, val in data.items()}",
+                "131: ",
+                "132:     def get_field_type(self) -> JiraSchemaTypes | None:",
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: ",
+                "140:         return JiraSchemaTypes(type)",
+                "141: ",
+                "142: ",
+                "143: @dataclass(frozen=True)",
+                "144: class JiraIssueTypeMetadata:",
+                "145:     id: str",
+                "146:     description: str",
+                "147:     name: str"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 129,
+            "matched_line": "    def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+            "context_start_line": 99,
+            "context_end_line": 159,
+            "context": [
+                "99:     schema: JiraSchema",
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: ",
+                "117:         schema = JiraSchema.from_dict(raw_schema)",
+                "118: ",
+                "119:         return cls(",
+                "120:             required=required,",
+                "121:             name=name,",
+                "122:             key=key,",
+                "123:             schema=schema,",
+                "124:             operations=operations,",
+                "125:             has_default_value=has_default_value,",
+                "126:         )",
+                "127: ",
+                "128:     @classmethod",
+                "129:     def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+                "130:         return {key: cls.from_dict(val) for key, val in data.items()}",
+                "131: ",
+                "132:     def get_field_type(self) -> JiraSchemaTypes | None:",
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: ",
+                "140:         return JiraSchemaTypes(type)",
+                "141: ",
+                "142: ",
+                "143: @dataclass(frozen=True)",
+                "144: class JiraIssueTypeMetadata:",
+                "145:     id: str",
+                "146:     description: str",
+                "147:     name: str",
+                "148:     subtask: bool",
+                "149:     icon_url: str",
+                "150:     url: str",
+                "151:     fields: dict[str, JiraField]",
+                "152: ",
+                "153:     @classmethod",
+                "154:     def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+                "155:         jira_id = data[\"id\"]",
+                "156:         description = data[\"description\"]",
+                "157:         name = data[\"name\"]",
+                "158:         subtask = data[\"subtask\"]",
+                "159:         icon_url = data[\"iconUrl\"]"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 130,
+            "matched_line": "        return {key: cls.from_dict(val) for key, val in data.items()}",
+            "context_start_line": 100,
+            "context_end_line": 160,
+            "context": [
+                "100:     name: str",
+                "101:     key: str",
+                "102:     operations: list[str]",
+                "103:     has_default_value: bool",
+                "104: ",
+                "105:     def is_custom_field(self) -> bool:",
+                "106:         return self.schema.custom is not None",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def from_dict(cls, data: dict[str, Any]) -> JiraField:",
+                "110:         required = data[\"required\"]",
+                "111:         name = data[\"name\"]",
+                "112:         key = data[\"key\"]",
+                "113:         operations = data[\"operations\"]",
+                "114:         has_default_value = data.get(\"hasDefaultValue\") or False",
+                "115:         raw_schema = data[\"schema\"]",
+                "116: ",
+                "117:         schema = JiraSchema.from_dict(raw_schema)",
+                "118: ",
+                "119:         return cls(",
+                "120:             required=required,",
+                "121:             name=name,",
+                "122:             key=key,",
+                "123:             schema=schema,",
+                "124:             operations=operations,",
+                "125:             has_default_value=has_default_value,",
+                "126:         )",
+                "127: ",
+                "128:     @classmethod",
+                "129:     def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+                "130:         return {key: cls.from_dict(val) for key, val in data.items()}",
+                "131: ",
+                "132:     def get_field_type(self) -> JiraSchemaTypes | None:",
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: ",
+                "140:         return JiraSchemaTypes(type)",
+                "141: ",
+                "142: ",
+                "143: @dataclass(frozen=True)",
+                "144: class JiraIssueTypeMetadata:",
+                "145:     id: str",
+                "146:     description: str",
+                "147:     name: str",
+                "148:     subtask: bool",
+                "149:     icon_url: str",
+                "150:     url: str",
+                "151:     fields: dict[str, JiraField]",
+                "152: ",
+                "153:     @classmethod",
+                "154:     def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+                "155:         jira_id = data[\"id\"]",
+                "156:         description = data[\"description\"]",
+                "157:         name = data[\"name\"]",
+                "158:         subtask = data[\"subtask\"]",
+                "159:         icon_url = data[\"iconUrl\"]",
+                "160:         url = data[\"self\"]"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 154,
+            "matched_line": "    def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+            "context_start_line": 124,
+            "context_end_line": 180,
+            "context": [
+                "124:             operations=operations,",
+                "125:             has_default_value=has_default_value,",
+                "126:         )",
+                "127: ",
+                "128:     @classmethod",
+                "129:     def from_dict_list(cls, data: dict[str, dict[str, Any]]) -> dict[str, JiraField]:",
+                "130:         return {key: cls.from_dict(val) for key, val in data.items()}",
+                "131: ",
+                "132:     def get_field_type(self) -> JiraSchemaTypes | None:",
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: ",
+                "140:         return JiraSchemaTypes(type)",
+                "141: ",
+                "142: ",
+                "143: @dataclass(frozen=True)",
+                "144: class JiraIssueTypeMetadata:",
+                "145:     id: str",
+                "146:     description: str",
+                "147:     name: str",
+                "148:     subtask: bool",
+                "149:     icon_url: str",
+                "150:     url: str",
+                "151:     fields: dict[str, JiraField]",
+                "152: ",
+                "153:     @classmethod",
+                "154:     def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+                "155:         jira_id = data[\"id\"]",
+                "156:         description = data[\"description\"]",
+                "157:         name = data[\"name\"]",
+                "158:         subtask = data[\"subtask\"]",
+                "159:         icon_url = data[\"iconUrl\"]",
+                "160:         url = data[\"self\"]",
+                "161:         raw_fields = data[\"fields\"]",
+                "162: ",
+                "163:         fields = JiraField.from_dict_list(raw_fields)",
+                "164: ",
+                "165:         return cls(",
+                "166:             id=jira_id,",
+                "167:             name=name,",
+                "168:             description=description,",
+                "169:             subtask=subtask,",
+                "170:             icon_url=icon_url,",
+                "171:             url=url,",
+                "172:             fields=fields,",
+                "173:         )",
+                "174: ",
+                "175:     @classmethod",
+                "176:     def from_jira_meta_config(cls, meta_config: dict[str, Any]) -> dict[str, JiraIssueTypeMetadata]:",
+                "177:         issue_types_list = meta_config.get(\"issuetypes\", {})",
+                "178:         issue_configs = [cls.from_dict(it) for it in issue_types_list]",
+                "179: ",
+                "180:         return {it.id: it for it in issue_configs}"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 163,
+            "matched_line": "        fields = JiraField.from_dict_list(raw_fields)",
+            "context_start_line": 133,
+            "context_end_line": 180,
+            "context": [
+                "133:         type: str | None = self.schema.schema_type",
+                "134:         if type == JiraSchemaTypes.array:",
+                "135:             type = self.schema.items",
+                "136: ",
+                "137:         if type not in JiraSchemaTypes:",
+                "138:             return None",
+                "139: ",
+                "140:         return JiraSchemaTypes(type)",
+                "141: ",
+                "142: ",
+                "143: @dataclass(frozen=True)",
+                "144: class JiraIssueTypeMetadata:",
+                "145:     id: str",
+                "146:     description: str",
+                "147:     name: str",
+                "148:     subtask: bool",
+                "149:     icon_url: str",
+                "150:     url: str",
+                "151:     fields: dict[str, JiraField]",
+                "152: ",
+                "153:     @classmethod",
+                "154:     def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+                "155:         jira_id = data[\"id\"]",
+                "156:         description = data[\"description\"]",
+                "157:         name = data[\"name\"]",
+                "158:         subtask = data[\"subtask\"]",
+                "159:         icon_url = data[\"iconUrl\"]",
+                "160:         url = data[\"self\"]",
+                "161:         raw_fields = data[\"fields\"]",
+                "162: ",
+                "163:         fields = JiraField.from_dict_list(raw_fields)",
+                "164: ",
+                "165:         return cls(",
+                "166:             id=jira_id,",
+                "167:             name=name,",
+                "168:             description=description,",
+                "169:             subtask=subtask,",
+                "170:             icon_url=icon_url,",
+                "171:             url=url,",
+                "172:             fields=fields,",
+                "173:         )",
+                "174: ",
+                "175:     @classmethod",
+                "176:     def from_jira_meta_config(cls, meta_config: dict[str, Any]) -> dict[str, JiraIssueTypeMetadata]:",
+                "177:         issue_types_list = meta_config.get(\"issuetypes\", {})",
+                "178:         issue_configs = [cls.from_dict(it) for it in issue_types_list]",
+                "179: ",
+                "180:         return {it.id: it for it in issue_configs}"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\jira\\models\\create_issue_metadata.py",
+            "line_number": 178,
+            "matched_line": "        issue_configs = [cls.from_dict(it) for it in issue_types_list]",
+            "context_start_line": 148,
+            "context_end_line": 180,
+            "context": [
+                "148:     subtask: bool",
+                "149:     icon_url: str",
+                "150:     url: str",
+                "151:     fields: dict[str, JiraField]",
+                "152: ",
+                "153:     @classmethod",
+                "154:     def from_dict(cls, data: dict[str, Any]) -> JiraIssueTypeMetadata:",
+                "155:         jira_id = data[\"id\"]",
+                "156:         description = data[\"description\"]",
+                "157:         name = data[\"name\"]",
+                "158:         subtask = data[\"subtask\"]",
+                "159:         icon_url = data[\"iconUrl\"]",
+                "160:         url = data[\"self\"]",
+                "161:         raw_fields = data[\"fields\"]",
+                "162: ",
+                "163:         fields = JiraField.from_dict_list(raw_fields)",
+                "164: ",
+                "165:         return cls(",
+                "166:             id=jira_id,",
+                "167:             name=name,",
+                "168:             description=description,",
+                "169:             subtask=subtask,",
+                "170:             icon_url=icon_url,",
+                "171:             url=url,",
+                "172:             fields=fields,",
+                "173:         )",
+                "174: ",
+                "175:     @classmethod",
+                "176:     def from_jira_meta_config(cls, meta_config: dict[str, Any]) -> dict[str, JiraIssueTypeMetadata]:",
+                "177:         issue_types_list = meta_config.get(\"issuetypes\", {})",
+                "178:         issue_configs = [cls.from_dict(it) for it in issue_types_list]",
+                "179: ",
+                "180:         return {it.id: it for it in issue_configs}"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\services\\assignment_source.py",
+            "line_number": 31,
+            "matched_line": "    def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:",
+            "context_start_line": 1,
+            "context_end_line": 35,
+            "context": [
+                "1: from __future__ import annotations",
+                "2: ",
+                "3: from dataclasses import asdict, dataclass",
+                "4: from datetime import datetime",
+                "5: from typing import TYPE_CHECKING, Any",
+                "6: ",
+                "7: from django.utils import timezone",
+                "8: ",
+                "9: if TYPE_CHECKING:",
+                "10:     from sentry.integrations.models import Integration",
+                "11:     from sentry.integrations.services.integration import RpcIntegration",
+                "12: ",
+                "13: ",
+                "14: @dataclass(frozen=True)",
+                "15: class AssignmentSource:",
+                "16:     source_name: str",
+                "17:     integration_id: int",
+                "18:     queued: datetime = timezone.now()",
+                "19: ",
+                "20:     @classmethod",
+                "21:     def from_integration(cls, integration: Integration | RpcIntegration) -> AssignmentSource:",
+                "22:         return AssignmentSource(",
+                "23:             source_name=integration.name,",
+                "24:             integration_id=integration.id,",
+                "25:         )",
+                "26: ",
+                "27:     def to_dict(self) -> dict[str, Any]:",
+                "28:         return asdict(self)",
+                "29: ",
+                "30:     @classmethod",
+                "31:     def from_dict(cls, input_dict: dict[str, Any]) -> AssignmentSource | None:",
+                "32:         try:",
+                "33:             return cls(**input_dict)",
+                "34:         except (ValueError, TypeError):",
+                "35:             return None"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\tasks\\sync_assignee_outbound.py",
+            "line_number": 54,
+            "matched_line": "        AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None",
+            "context_start_line": 24,
+            "context_end_line": 67,
+            "context": [
+                "24:         ExternalIssue.DoesNotExist,",
+                "25:         Integration.DoesNotExist,",
+                "26:         User.DoesNotExist,",
+                "27:         Organization.DoesNotExist,",
+                "28:     )",
+                "29: )",
+                "30: def sync_assignee_outbound(",
+                "31:     external_issue_id: int,",
+                "32:     user_id: int | None,",
+                "33:     assign: bool,",
+                "34:     assignment_source_dict: dict[str, Any] | None = None,",
+                "35: ) -> None:",
+                "36:     # Sync Sentry assignee to an external issue.",
+                "37:     external_issue = ExternalIssue.objects.get(id=external_issue_id)",
+                "38: ",
+                "39:     organization = Organization.objects.get(id=external_issue.organization_id)",
+                "40:     has_issue_sync = features.has(\"organizations:integrations-issue-sync\", organization)",
+                "41:     if not has_issue_sync:",
+                "42:         return",
+                "43:     integration = integration_service.get_integration(integration_id=external_issue.integration_id)",
+                "44:     if not integration:",
+                "45:         return",
+                "46: ",
+                "47:     installation = integration.get_installation(organization_id=external_issue.organization_id)",
+                "48:     if not (",
+                "49:         hasattr(installation, \"should_sync\") and hasattr(installation, \"sync_assignee_outbound\")",
+                "50:     ):",
+                "51:         return",
+                "52: ",
+                "53:     parsed_assignment_source = (",
+                "54:         AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None",
+                "55:     )",
+                "56:     if installation.should_sync(\"outbound_assignee\", parsed_assignment_source):",
+                "57:         # Assume unassign if None.",
+                "58:         user = user_service.get_user(user_id) if user_id else None",
+                "59:         installation.sync_assignee_outbound(",
+                "60:             external_issue, user, assign=assign, assignment_source=parsed_assignment_source",
+                "61:         )",
+                "62:         analytics.record(",
+                "63:             \"integration.issue.assignee.synced\",",
+                "64:             provider=integration.provider,",
+                "65:             id=integration.id,",
+                "66:             organization_id=external_issue.organization_id,",
+                "67:         )"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\utils\\commit_context.py",
+            "line_number": 48,
+            "matched_line": "                EventFrame.from_dict(frame)",
+            "context_start_line": 18,
+            "context_end_line": 78,
+            "context": [
+                "18:     FileBlameInfo,",
+                "19:     SourceLineInfo,",
+                "20: )",
+                "21: from sentry.integrations.utils.code_mapping import convert_stacktrace_frame_path_to_source_path",
+                "22: from sentry.models.commit import Commit",
+                "23: from sentry.models.commitauthor import CommitAuthor",
+                "24: from sentry.shared_integrations.exceptions import ApiError",
+                "25: from sentry.utils import metrics",
+                "26: from sentry.utils.committers import get_stacktrace_path_from_event_frame",
+                "27: from sentry.utils.event_frames import EventFrame",
+                "28: ",
+                "29: logger = logging.getLogger(\"sentry.tasks.process_commit_context\")",
+                "30: ",
+                "31: ",
+                "32: def find_commit_context_for_event_all_frames(",
+                "33:     code_mappings: Sequence[RepositoryProjectPathConfig],",
+                "34:     frames: Sequence[Mapping[str, Any]],",
+                "35:     organization_id: int,",
+                "36:     project_id: int,",
+                "37:     platform: str,",
+                "38:     sdk_name: str | None,",
+                "39:     extra: Mapping[str, Any],",
+                "40: ) -> tuple[FileBlameInfo | None, IntegrationInstallation | None]:",
+                "41:     \"\"\"",
+                "42:     Given a list of event frames and code mappings, finds the most recent commit.",
+                "43:     Will also emit analytics events for success or failure.",
+                "44:     \"\"\"",
+                "45:     valid_frames = list(",
+                "46:         OrderedSet(",
+                "47:             [",
+                "48:                 EventFrame.from_dict(frame)",
+                "49:                 for frame in frames",
+                "50:                 if frame.get(\"lineno\") is not None and frame.get(\"in_app\")",
+                "51:             ]",
+                "52:         )",
+                "53:     )",
+                "54: ",
+                "55:     (",
+                "56:         integration_to_files_mapping,",
+                "57:         num_successfully_mapped_frames,",
+                "58:     ) = _generate_integration_to_files_mapping(",
+                "59:         frames=valid_frames,",
+                "60:         code_mappings=code_mappings,",
+                "61:         platform=platform,",
+                "62:         sdk_name=sdk_name,",
+                "63:         extra=extra,",
+                "64:     )",
+                "65: ",
+                "66:     file_blames, integration_to_install_mapping = _get_blames_from_all_integrations(",
+                "67:         integration_to_files_mapping=integration_to_files_mapping,",
+                "68:         organization_id=organization_id,",
+                "69:         project_id=project_id,",
+                "70:         extra=extra,",
+                "71:     )",
+                "72: ",
+                "73:     most_recent_blame = max(file_blames, key=lambda blame: blame.commit.committedDate, default=None)",
+                "74:     # Only return suspect commits that are less than a year old",
+                "75:     selected_blame = (",
+                "76:         most_recent_blame",
+                "77:         if most_recent_blame and is_date_less_than_year(most_recent_blame.commit.committedDate)",
+                "78:         else None"
+            ]
+        },
+        {
+            "file": "src\\sentry\\integrations\\utils\\stacktrace_link.py",
+            "line_number": 91,
+            "matched_line": "            frame=EventFrame.from_dict(ctx),",
+            "context_start_line": 61,
+            "context_end_line": 115,
+            "context": [
+                "61:     result[\"sourcePath\"] = src_path",
+                "62: ",
+                "63:     return result",
+                "64: ",
+                "65: ",
+                "66: class StacktraceLinkConfig(TypedDict):",
+                "67:     config: RepositoryProjectPathConfig",
+                "68:     outcome: RepositoryLinkOutcome",
+                "69:     repository: Repository",
+                "70: ",
+                "71: ",
+                "72: class StacktraceLinkOutcome(TypedDict):",
+                "73:     source_url: str | None",
+                "74:     error: str | None",
+                "75:     current_config: StacktraceLinkConfig | None",
+                "76:     iteration_count: int",
+                "77: ",
+                "78: ",
+                "79: def get_stacktrace_config(",
+                "80:     configs: list[RepositoryProjectPathConfig],",
+                "81:     ctx: StacktraceLinkContext,",
+                "82: ) -> StacktraceLinkOutcome:",
+                "83:     result: StacktraceLinkOutcome = {",
+                "84:         \"source_url\": None,",
+                "85:         \"error\": None,",
+                "86:         \"current_config\": None,",
+                "87:         \"iteration_count\": 0,",
+                "88:     }",
+                "89:     for config in configs:",
+                "90:         src_path = convert_stacktrace_frame_path_to_source_path(",
+                "91:             frame=EventFrame.from_dict(ctx),",
+                "92:             platform=ctx[\"platform\"],",
+                "93:             sdk_name=ctx[\"sdk_name\"],",
+                "94:             code_mapping=config,",
+                "95:         )",
+                "96: ",
+                "97:         if not src_path:",
+                "98:             result[\"error\"] = \"stack_root_mismatch\"",
+                "99:             continue",
+                "100: ",
+                "101:         outcome = get_link(config, src_path, ctx[\"commit_id\"])",
+                "102:         result[\"iteration_count\"] += 1",
+                "103: ",
+                "104:         result[\"current_config\"] = {",
+                "105:             \"config\": config,",
+                "106:             \"outcome\": outcome,",
+                "107:             \"repository\": config.repository,",
+                "108:         }",
+                "109: ",
+                "110:         # Stop processing if a match is found",
+                "111:         if outcome.get(\"sourceUrl\") and outcome[\"sourceUrl\"]:",
+                "112:             result[\"source_url\"] = outcome[\"sourceUrl\"]",
+                "113:             return result",
+                "114: ",
+                "115:     return result"
+            ]
+        },
+        {
+            "file": "src\\sentry\\issues\\escalating_group_forecast.py",
+            "line_number": 74,
+            "matched_line": "            return EscalatingGroupForecast.from_dict(results)",
+            "context_start_line": 44,
+            "context_end_line": 104,
+            "context": [
+                "44:     def save(self) -> None:",
+                "45:         nodestore.backend.set(",
+                "46:             self.build_storage_identifier(self.project_id, self.group_id),",
+                "47:             self.to_dict(),",
+                "48:             ttl=timedelta(GROUP_FORECAST_TTL),",
+                "49:         )",
+                "50: ",
+                "51:     @classmethod",
+                "52:     def _should_fetch_escalating(cls, group_id: int) -> bool:",
+                "53:         group = Group.objects.get(id=group_id)",
+                "54: ",
+                "55:         return group.issue_type.should_detect_escalation()",
+                "56: ",
+                "57:     @classmethod",
+                "58:     def fetch(cls, project_id: int, group_id: int) -> EscalatingGroupForecast | None:",
+                "59:         \"\"\"",
+                "60:         Return the forecast from nodestore if it exists.",
+                "61: ",
+                "62:         If the group's issue type does not allow escalation, return None.",
+                "63: ",
+                "64:         If the forecast does not exist, it is because the TTL expired and the issue has not been seen in 7 days.",
+                "65:         In this case, generate the forecast in a task, and return the forecast for one event.",
+                "66:         \"\"\"",
+                "67:         from sentry.issues.forecasts import generate_and_save_missing_forecasts",
+                "68: ",
+                "69:         if not cls._should_fetch_escalating(group_id=group_id):",
+                "70:             return None",
+                "71: ",
+                "72:         results = nodestore.backend.get(cls.build_storage_identifier(project_id, group_id))",
+                "73:         if results:",
+                "74:             return EscalatingGroupForecast.from_dict(results)",
+                "75:         generate_and_save_missing_forecasts.delay(group_id=group_id)",
+                "76:         return EscalatingGroupForecast(",
+                "77:             project_id=project_id,",
+                "78:             group_id=group_id,",
+                "79:             forecast=ONE_EVENT_FORECAST,",
+                "80:             date_added=datetime.now(),",
+                "81:         )",
+                "82: ",
+                "83:     @classmethod",
+                "84:     def fetch_todays_forecast(cls, project_id: int, group_id: int) -> int | None:",
+                "85:         date_now = datetime.now().date()",
+                "86:         escalating_forecast = EscalatingGroupForecast.fetch(project_id, group_id)",
+                "87: ",
+                "88:         if not escalating_forecast:",
+                "89:             return None",
+                "90: ",
+                "91:         date_added = escalating_forecast.date_added.date()",
+                "92:         forecast_today_index = (date_now - date_added).days",
+                "93: ",
+                "94:         if forecast_today_index == len(escalating_forecast.forecast):",
+                "95:             # Use last available forecast since the previous nodestore forecast hasn't expired yet",
+                "96:             forecast_today_index = -1",
+                "97:         elif forecast_today_index > len(escalating_forecast.forecast):",
+                "98:             # This should not happen, but exists as a check",
+                "99:             forecast_today_index = -1",
+                "100:             logger.error(",
+                "101:                 \"Forecast list index is out of range. Index: %s. Date now: %s. Forecast date added: %s.\",",
+                "102:                 forecast_today_index,",
+                "103:                 date_now,",
+                "104:                 date_added,"
+            ]
+        },
+        {
+            "file": "src\\sentry\\issues\\escalating_group_forecast.py",
+            "line_number": 124,
+            "matched_line": "    def from_dict(cls, data: EscalatingGroupForecastData) -> EscalatingGroupForecast:",
+            "context_start_line": 94,
+            "context_end_line": 130,
+            "context": [
+                "94:         if forecast_today_index == len(escalating_forecast.forecast):",
+                "95:             # Use last available forecast since the previous nodestore forecast hasn't expired yet",
+                "96:             forecast_today_index = -1",
+                "97:         elif forecast_today_index > len(escalating_forecast.forecast):",
+                "98:             # This should not happen, but exists as a check",
+                "99:             forecast_today_index = -1",
+                "100:             logger.error(",
+                "101:                 \"Forecast list index is out of range. Index: %s. Date now: %s. Forecast date added: %s.\",",
+                "102:                 forecast_today_index,",
+                "103:                 date_now,",
+                "104:                 date_added,",
+                "105:             )",
+                "106:         return escalating_forecast.forecast[forecast_today_index]",
+                "107: ",
+                "108:     @classmethod",
+                "109:     def build_storage_identifier(cls, project_id: int, group_id: int) -> str:",
+                "110:         identifier = hashlib.md5(f\"{project_id}::{group_id}\".encode()).hexdigest()",
+                "111:         return f\"e-g-f:{identifier}\"",
+                "112: ",
+                "113:     def to_dict(",
+                "114:         self,",
+                "115:     ) -> EscalatingGroupForecastData:",
+                "116:         return {",
+                "117:             \"project_id\": self.project_id,",
+                "118:             \"group_id\": self.group_id,",
+                "119:             \"forecast\": self.forecast,",
+                "120:             \"date_added\": self.date_added.timestamp(),",
+                "121:         }",
+                "122: ",
+                "123:     @classmethod",
+                "124:     def from_dict(cls, data: EscalatingGroupForecastData) -> EscalatingGroupForecast:",
+                "125:         return cls(",
+                "126:             data[\"project_id\"],",
+                "127:             data[\"group_id\"],",
+                "128:             data[\"forecast\"],",
+                "129:             cast(datetime, parse_timestamp(data[\"date_added\"])),",
+                "130:         )"
+            ]
+        },
+        {
+            "file": "src\\sentry\\issues\\ingest.py",
+            "line_number": 47,
+            "matched_line": "    occurrence = IssueOccurrence.from_dict(occurrence_data)",
+            "context_start_line": 17,
+            "context_end_line": 77,
+            "context": [
+                "17:     _get_or_create_group_environment,",
+                "18:     _get_or_create_group_release,",
+                "19:     _increment_release_associated_counts,",
+                "20:     _process_existing_aggregate,",
+                "21:     get_event_type,",
+                "22:     save_grouphash_and_group,",
+                "23: )",
+                "24: from sentry.eventstore.models import Event, GroupEvent, augment_message_with_occurrence",
+                "25: from sentry.issues.grouptype import FeedbackGroup, should_create_group",
+                "26: from sentry.issues.issue_occurrence import IssueOccurrence, IssueOccurrenceData",
+                "27: from sentry.models.groupassignee import GroupAssignee",
+                "28: from sentry.models.grouphash import GroupHash",
+                "29: from sentry.models.release import Release",
+                "30: from sentry.ratelimits.sliding_windows import RedisSlidingWindowRateLimiter, RequestedQuota",
+                "31: from sentry.utils import json, metrics, redis",
+                "32: from sentry.utils.tag_normalization import normalized_sdk_tag_from_event",
+                "33: ",
+                "34: issue_rate_limiter = RedisSlidingWindowRateLimiter(",
+                "35:     **settings.SENTRY_ISSUE_PLATFORM_RATE_LIMITER_OPTIONS",
+                "36: )",
+                "37: ",
+                "38: ",
+                "39: logger = logging.getLogger(__name__)",
+                "40: ",
+                "41: ",
+                "42: @sentry_sdk.tracing.trace",
+                "43: def save_issue_occurrence(",
+                "44:     occurrence_data: IssueOccurrenceData, event: Event",
+                "45: ) -> tuple[IssueOccurrence, GroupInfo | None]:",
+                "46:     # Convert occurrence data to `IssueOccurrence`",
+                "47:     occurrence = IssueOccurrence.from_dict(occurrence_data)",
+                "48:     if occurrence.event_id != event.event_id:",
+                "49:         raise ValueError(\"IssueOccurrence must have the same event_id as the passed Event\")",
+                "50:     # Note: For now we trust the project id passed along with the event. Later on we should make",
+                "51:     # sure that this is somehow validated.",
+                "52:     occurrence.save()",
+                "53: ",
+                "54:     try:",
+                "55:         release = Release.get(event.project, event.release)",
+                "56:     except Release.DoesNotExist:",
+                "57:         # The release should always exist here since event has been ingested at this point, but just",
+                "58:         # in case it has been deleted",
+                "59:         release = None",
+                "60:     group_info = save_issue_from_occurrence(occurrence, event, release)",
+                "61:     if group_info:",
+                "62:         environment = event.get_environment()",
+                "63:         _get_or_create_group_environment(environment, release, [group_info])",
+                "64:         _increment_release_associated_counts(",
+                "65:             group_info.group.project, environment, release, [group_info]",
+                "66:         )",
+                "67:         _get_or_create_group_release(environment, release, event, [group_info])",
+                "68:         send_issue_occurrence_to_eventstream(event, occurrence, group_info)",
+                "69:     return occurrence, group_info",
+                "70: ",
+                "71: ",
+                "72: def process_occurrence_data(data: dict[str, Any]) -> None:",
+                "73:     if \"fingerprint\" not in data:",
+                "74:         return",
+                "75: ",
+                "76:     # Hash fingerprints to make sure they're a consistent length",
+                "77:     data[\"fingerprint\"] = [md5(part.encode(\"utf-8\")).hexdigest() for part in data[\"fingerprint\"]]"
+            ]
+        },
+        {
+            "file": "src\\sentry\\issues\\issue_occurrence.py",
+            "line_number": 126,
+            "matched_line": "    def from_dict(cls, data: IssueOccurrenceData) -> IssueOccurrence:",
+            "context_start_line": 96,
+            "context_end_line": 156,
+            "context": [
+                "96:     culprit: str",
+                "97:     initial_issue_priority: int | None = None",
+                "98:     assignee: Actor | None = None",
+                "99: ",
+                "100:     def __post_init__(self) -> None:",
+                "101:         if not is_aware(self.detection_time):",
+                "102:             raise ValueError(\"detection_time must be timezone aware\")",
+                "103: ",
+                "104:     def to_dict(",
+                "105:         self,",
+                "106:     ) -> IssueOccurrenceData:",
+                "107:         return {",
+                "108:             \"id\": self.id,",
+                "109:             \"project_id\": self.project_id,",
+                "110:             \"event_id\": self.event_id,",
+                "111:             \"fingerprint\": self.fingerprint,",
+                "112:             \"issue_title\": self.issue_title,",
+                "113:             \"subtitle\": self.subtitle,",
+                "114:             \"resource_id\": self.resource_id,",
+                "115:             \"evidence_data\": self.evidence_data,",
+                "116:             \"evidence_display\": [evidence.to_dict() for evidence in self.evidence_display],",
+                "117:             \"type\": self.type.type_id,",
+                "118:             \"detection_time\": self.detection_time.timestamp(),",
+                "119:             \"level\": self.level,",
+                "120:             \"culprit\": self.culprit,",
+                "121:             \"initial_issue_priority\": self.initial_issue_priority,",
+                "122:             \"assignee\": self.assignee.identifier if self.assignee else None,",
+                "123:         }",
+                "124: ",
+                "125:     @classmethod",
+                "126:     def from_dict(cls, data: IssueOccurrenceData) -> IssueOccurrence:",
+                "127:         from sentry.api.serializers.rest_framework import ValidationError",
+                "128: ",
+                "129:         # Backwards compatibility - we used to not require this field, so set a default when `None`",
+                "130:         level = data.get(\"level\")",
+                "131:         if not level:",
+                "132:             level = DEFAULT_LEVEL",
+                "133:         culprit = data.get(\"culprit\")",
+                "134:         if not culprit:",
+                "135:             culprit = \"\"",
+                "136: ",
+                "137:         assignee = None",
+                "138:         try:",
+                "139:             # Note that this can cause IO, but in practice this will happen only the first time that",
+                "140:             # the occurrence is sent to the issue platform. We then translate to the id and store",
+                "141:             # that, so subsequent fetches won't cause IO.",
+                "142:             assignee = Actor.from_identifier(data.get(\"assignee\"))",
+                "143:         except ValidationError:",
+                "144:             logging.exception(\"Failed to parse assignee actor identifier\")",
+                "145:         except Exception:",
+                "146:             # We never want this to cause parsing an occurrence to fail",
+                "147:             logging.exception(\"Unexpected error parsing assignee\")",
+                "148:         return cls(",
+                "149:             data[\"id\"],",
+                "150:             data[\"project_id\"],",
+                "151:             # We'll always have an event id when loading an issue occurrence",
+                "152:             data[\"event_id\"],",
+                "153:             data[\"fingerprint\"],",
+                "154:             data[\"issue_title\"],",
+                "155:             data[\"subtitle\"],",
+                "156:             data[\"resource_id\"],"
+            ]
+        }
+    ],
+    "total": 20,
+    "truncated": true,
+    "max_results": 20,
+    "message": "Results truncated at max_results; rerun with higher max_results or narrower include_patterns."
+}
+
+Message 4 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "AssignmentSource\\.from_dict",
+      "include_patterns": [
+        "*.py"
+      ],
+      "max_results": 20
+    },
+    "id": "call_00_UQMhxEgxGRW8S4NERHvE8068",
+    "type": "tool_call"
+  }
+]
+
+Message 5 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_UQMhxEgxGRW8S4NERHvE8068
+Result:
+{
+    "matches": [
+        {
+            "file": "src\\sentry\\integrations\\tasks\\sync_assignee_outbound.py",
+            "line_number": 54,
+            "matched_line": "        AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None",
+            "context_start_line": 24,
+            "context_end_line": 67,
+            "context": [
+                "24:         ExternalIssue.DoesNotExist,",
+                "25:         Integration.DoesNotExist,",
+                "26:         User.DoesNotExist,",
+                "27:         Organization.DoesNotExist,",
+                "28:     )",
+                "29: )",
+                "30: def sync_assignee_outbound(",
+                "31:     external_issue_id: int,",
+                "32:     user_id: int | None,",
+                "33:     assign: bool,",
+                "34:     assignment_source_dict: dict[str, Any] | None = None,",
+                "35: ) -> None:",
+                "36:     # Sync Sentry assignee to an external issue.",
+                "37:     external_issue = ExternalIssue.objects.get(id=external_issue_id)",
+                "38: ",
+                "39:     organization = Organization.objects.get(id=external_issue.organization_id)",
+                "40:     has_issue_sync = features.has(\"organizations:integrations-issue-sync\", organization)",
+                "41:     if not has_issue_sync:",
+                "42:         return",
+                "43:     integration = integration_service.get_integration(integration_id=external_issue.integration_id)",
+                "44:     if not integration:",
+                "45:         return",
+                "46: ",
+                "47:     installation = integration.get_installation(organization_id=external_issue.organization_id)",
+                "48:     if not (",
+                "49:         hasattr(installation, \"should_sync\") and hasattr(installation, \"sync_assignee_outbound\")",
+                "50:     ):",
+                "51:         return",
+                "52: ",
+                "53:     parsed_assignment_source = (",
+                "54:         AssignmentSource.from_dict(assignment_source_dict) if assignment_source_dict else None",
+                "55:     )",
+                "56:     if installation.should_sync(\"outbound_assignee\", parsed_assignment_source):",
+                "57:         # Assume unassign if None.",
+                "58:         user = user_service.get_user(user_id) if user_id else None",
+                "59:         installation.sync_assignee_outbound(",
+                "60:             external_issue, user, assign=assign, assignment_source=parsed_assignment_source",
+                "61:         )",
+                "62:         analytics.record(",
+                "63:             \"integration.issue.assignee.synced\",",
+                "64:             provider=integration.provider,",
+                "65:             id=integration.id,",
+                "66:             organization_id=external_issue.organization_id,",
+                "67:         )"
+            ]
+        },
+        {
+            "file": "tests\\sentry\\integrations\\services\\test_assignment_source.py",
+            "line_number": 10,
+            "matched_line": "        result = AssignmentSource.from_dict(data)",
+            "context_start_line": 1,
+            "context_end_line": 38,
+            "context": [
+                "1: from typing import Any",
+                "2: ",
+                "3: from sentry.integrations.services.assignment_source import AssignmentSource",
+                "4: from sentry.testutils.cases import TestCase",
+                "5: ",
+                "6: ",
+                "7: class TestAssignmentSource(TestCase):",
+                "8:     def test_from_dict_empty_array(self):",
+                "9:         data: dict[str, Any] = {}",
+                "10:         result = AssignmentSource.from_dict(data)",
+                "11:         assert result is None",
+                "12: ",
+                "13:     def test_from_dict_inalid_data(self):",
+                "14:         data = {",
+                "15:             \"foo\": \"bar\",",
+                "16:         }",
+                "17: ",
+                "18:         result = AssignmentSource.from_dict(data)",
+                "19:         assert result is None",
+                "20: ",
+                "21:     def test_from_dict_valid_data(self):",
+                "22:         data = {\"source_name\": \"foo-source\", \"integration_id\": 123}",
+                "23: ",
+                "24:         result = AssignmentSource.from_dict(data)",
+                "25:         assert result is not None",
+                "26:         assert result.source_name == \"foo-source\"",
+                "27:         assert result.integration_id == 123",
+                "28: ",
+                "29:     def test_to_dict(self):",
+                "30:         source = AssignmentSource(",
+                "31:             source_name=\"foo-source\",",
+                "32:             integration_id=123,",
+                "33:         )",
+                "34: ",
+                "35:         result = source.to_dict()",
+                "36:         assert result.get(\"queued\") is not None",
+                "37:         assert result.get(\"source_name\") == \"foo-source\"",
+                "38:         assert result.get(\"integration_id\") == 123"
+            ]
+        },
+        {
+            "file": "tests\\sentry\\integrations\\services\\test_assignment_source.py",
+            "line_number": 18,
+            "matched_line": "        result = AssignmentSource.from_dict(data)",
+            "context_start_line": 1,
+            "context_end_line": 38,
+            "context": [
+                "1: from typing import Any",
+                "2: ",
+                "3: from sentry.integrations.services.assignment_source import AssignmentSource",
+                "4: from sentry.testutils.cases import TestCase",
+                "5: ",
+                "6: ",
+                "7: class TestAssignmentSource(TestCase):",
+                "8:     def test_from_dict_empty_array(self):",
+                "9:         data: dict[str, Any] = {}",
+                "10:         result = AssignmentSource.from_dict(data)",
+                "11:         assert result is None",
+                "12: ",
+                "13:     def test_from_dict_inalid_data(self):",
+                "14:         data = {",
+                "15:             \"foo\": \"bar\",",
+                "16:         }",
+                "17: ",
+                "18:         result = AssignmentSource.from_dict(data)",
+                "19:         assert result is None",
+                "20: ",
+                "21:     def test_from_dict_valid_data(self):",
+                "22:         data = {\"source_name\": \"foo-source\", \"integration_id\": 123}",
+                "23: ",
+                "24:         result = AssignmentSource.from_dict(data)",
+                "25:         assert result is not None",
+                "26:         assert result.source_name == \"foo-source\"",
+                "27:         assert result.integration_id == 123",
+                "28: ",
+                "29:     def test_to_dict(self):",
+                "30:         source = AssignmentSource(",
+                "31:             source_name=\"foo-source\",",
+                "32:             integration_id=123,",
+                "33:         )",
+                "34: ",
+                "35:         result = source.to_dict()",
+                "36:         assert result.get(\"queued\") is not None",
+                "37:         assert result.get(\"source_name\") == \"foo-source\"",
+                "38:         assert result.get(\"integration_id\") == 123"
+            ]
+        },
+        {
+            "file": "tests\\sentry\\integrations\\services\\test_assignment_source.py",
+            "line_number": 24,
+            "matched_line": "        result = AssignmentSource.from_dict(data)",
+            "context_start_line": 1,
+            "context_end_line": 38,
+            "context": [
+                "1: from typing import Any",
+                "2: ",
+                "3: from sentry.integrations.services.assignment_source import AssignmentSource",
+                "4: from sentry.testutils.cases import TestCase",
+                "5: ",
+                "6: ",
+                "7: class TestAssignmentSource(TestCase):",
+                "8:     def test_from_dict_empty_array(self):",
+                "9:         data: dict[str, Any] = {}",
+                "10:         result = AssignmentSource.from_dict(data)",
+                "11:         assert result is None",
+                "12: ",
+                "13:     def test_from_dict_inalid_data(self):",
+                "14:         data = {",
+                "15:             \"foo\": \"bar\",",
+                "16:         }",
+                "17: ",
+                "18:         result = AssignmentSource.from_dict(data)",
+                "19:         assert result is None",
+                "20: ",
+                "21:     def test_from_dict_valid_data(self):",
+                "22:         data = {\"source_name\": \"foo-source\", \"integration_id\": 123}",
+                "23: ",
+                "24:         result = AssignmentSource.from_dict(data)",
+                "25:         assert result is not None",
+                "26:         assert result.source_name == \"foo-source\"",
+                "27:         assert result.integration_id == 123",
+                "28: ",
+                "29:     def test_to_dict(self):",
+                "30:         source = AssignmentSource(",
+                "31:             source_name=\"foo-source\",",
+                "32:             integration_id=123,",
+                "33:         )",
+                "34: ",
+                "35:         result = source.to_dict()",
+                "36:         assert result.get(\"queued\") is not None",
+                "37:         assert result.get(\"source_name\") == \"foo-source\"",
+                "38:         assert result.get(\"integration_id\") == 123"
+            ]
+        }
+    ],
+    "total": 4,
+    "truncated": false
+}
+
+Message 6 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+非常好，我现在有了充分的证据。让我总结分析：
+
+## 分析结论
+
+**可证伪断言**：`from_dict` 方法（第31-35行）在 `input_dict` 缺少必需字段（`source_name` 或 `integration_id`）时，`cls(**input_dict)` 会抛出 `TypeError`（"missing required positional argument"），而 `TypeError` 已经在 `except` 子句中被捕获。
+
+**关键事实**：
+1. Python `dataclass` 在缺少必需参数时抛出 `TypeError`，而不是 `KeyError`。
+2. 当前 `except (ValueError, TypeError)` 已经捕获了 `TypeError`。
+3. 测试文件 `test_assignment_source.py` 第8-11行明确测试了空 dict 场景（`data: dict[str, Any] = {}`），断言 `result is None`，验证了 `TypeError` 被正确捕获。
+4. 测试文件第13-19行测试了无效数据（包含无关字段 `foo`），也断言 `result is None`，验证了 `TypeError`（unexpected keyword argument）被正确捕获。
+
+**关于 KeyError 的评估**：`cls(**input_dict)` 使用关键字参数解包，不会触发 `KeyError`。`KeyError` 只会在显式访问 dict 键时发生（如 `input_dict['source_name']`）。所以这里不存在 `KeyError` 风险。
+
+**结论**：这是一个误报。当前代码已经正确处理了所有边界情况（缺少必需字段、包含未知字段），测试也覆盖了这些场景。
+
+```json
+{
+  "risk_type": "Robustness_Boundary_Conditions",
+  "file_path": "src/sentry/integrations/services/assignment_source.py",
+  "line_number": [31, 35],
+  "description": "误报：from_dict 方法使用 cls(**input_dict) 构造 dataclass，当 input_dict 缺少必需字段（source_name/integration_id）时，Python dataclass 抛出 TypeError（'missing required positional argument'），而非 KeyError。当前 except (ValueError, TypeError) 已正确捕获该异常。测试文件 test_assignment_source.py 第8-11行（空 dict）和第13-19行（无效字段）已验证此行为，均返回 None。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修改。当前异常处理已覆盖所有边界情况。如需更精确的错误区分，可考虑分别处理 ValueError 和 TypeError，但当前统一返回 None 的设计是合理的。"
+}
+```
+
+

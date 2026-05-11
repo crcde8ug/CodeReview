@@ -17,11 +17,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-# Fix Windows console encoding issue
-if sys.platform == 'win32':
+# Fix Windows console encoding issue (only if not already wrapped)
+if sys.platform == 'win32' and not hasattr(sys.stdout, '_utf8_wrapped'):
     import codecs
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stdout._utf8_wrapped = True
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    sys.stderr._utf8_wrapped = True
 
 from core.config import Config
 from dao.factory import get_storage
@@ -364,11 +366,12 @@ async def run_review(
     
     # Generate timestamp for this run (used for both log and results files)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+    date_str = datetime.now().strftime("%Y-%m-%d")
+
     # Sanitize branch names for filesystem
     base_sanitized = base_branch.replace("/", "_").replace("\\", "_").replace("..", "").replace(" ", "_")
     head_sanitized = head_branch.replace("/", "_").replace("\\", "_").replace("..", "").replace(" ", "_")
-    
+
     try:
         results = await run_multi_agent_workflow(
             diff_context=pr_diff,
@@ -376,27 +379,27 @@ async def run_review(
             config=config,
             lint_errors=lint_errors
         )
-        
+
         # Print results (pass timestamp so log file uses same timestamp)
         if not quiet:
             print_review_results(
-                results, 
-                workspace_root=repo_path, 
+                results,
+                workspace_root=repo_path,
                 config=config,
                 base_branch=base_branch,
                 head_branch=head_branch,
                 timestamp=timestamp
             )
-        
+
         # Generate output directory and filename based on repo_name and model_name
         repo_name = get_repo_name(repo_path)
         repo_name = repo_name.replace("/", "_").replace("\\", "_").replace("..", "")
-        
+
         model_name = config.llm.provider or "unknown"
         model_name = model_name.replace("/", "_").replace("\\", "_")
-        
-        # Create output directory: log/repo_name/model_name/{base}_2_{head}_{timestamp}/
-        output_dir = Path("log") / repo_name / model_name / f"{base_sanitized}_2_{head_sanitized}_{timestamp}"
+
+        # Create output directory: log/{date}/repo_name/model_name/{base}_2_{head}_{timestamp}/
+        output_dir = Path("log") / date_str / repo_name / model_name / f"{base_sanitized}_2_{head_sanitized}_{timestamp}"
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate filename: review_results_{base}_2_{head}.md (no timestamp in filename)

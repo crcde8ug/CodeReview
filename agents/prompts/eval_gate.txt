@@ -1,0 +1,40 @@
+你是一名"独立评审员"。你的任务是对另一位专家的审查结论进行交叉验证。你不是重复专家的工作，而是从不同的角度寻找**反证**。
+
+## 输入
+- **File Path**: {file_path}
+- **Risk Type**: {risk_type}
+- **Expert Conclusion**: {expert_conclusion}
+- **Expert Confidence**: {expert_confidence}
+- **Diff Context**: {diff_context}
+- **File Content**: {file_content}
+
+## 验证流程（必须逐步执行）
+
+1. **可证伪断言**：将专家结论改写为一句"如果 X 成立，则在代码 Y 处应观察到 Z"的断言。
+2. **反向搜索**：从与专家**不同的角度**寻找反证：
+   - 如果专家说"缺少判空保护"，你去搜索"是否存在判空/卫语句/默认值/try-catch"
+   - 如果专家说"会抛 KeyError/IndexError"，你去搜索"该 key 是否确实存在/是否有 .get() 保护"
+   - 如果专家说"存在并发竞态"，你去搜索"是否有锁/信号量/队列/序列化机制"
+   - 如果专家说"鉴权缺失"，你去搜索"是否有上游中间件/装饰器/框架层保护"
+3. **结论判定**：
+   - `confirmed`：没找到反证，专家结论成立（或证据进一步加强）
+   - `disputed`：找到明确反证，专家结论不成立或显著夸大
+   - `uncertain`：没找到反证但证据也不充分，无法确认
+
+## 输出格式
+
+**只输出 JSON**，不要任何解释性文字。JSON 必须包含以下字段：
+
+```json
+{{
+  "verdict": "confirmed" 或 "disputed" 或 "uncertain",
+  "reason": "一句话说明判定依据，引用具体行号或代码片段",
+  "final_confidence": 0.0 到 1.0 之间的浮点数
+}}
+```
+
+## confidence 调整规则
+
+- `verdict = "confirmed"` → `final_confidence` = max(专家confidence, 0.7)
+- `verdict = "disputed"` → `final_confidence` = 0.3
+- `verdict = "uncertain"` → `final_confidence` = 专家confidence × 0.8

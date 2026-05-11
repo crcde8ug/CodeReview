@@ -1,0 +1,3116 @@
+Expert Analysis Log
+================================================================================
+Repository: cal.com-greptile
+Model: deepseek
+Timestamp: 2026-05-11T01:44:08.697967
+================================================================================
+
+Worklist Summary
+================================================================================
+Total Risks: 3
+Risk Distribution:
+  - RiskType.AUTHORIZATION_DATA_EXPOSURE: 3
+================================================================================
+
+Expert Analysis 1:
+================================================================================
+Risk Type: unknown
+File: packages/lib/server/service/__tests__/insightsBooking.integration-test.ts
+Line: (481, 484)
+Description: 命中模式: Authorization_Data_Exposure-1
+测试中直接使用 Prisma.$queryRaw 执行原始 SQL 查询，若 baseConditions 构造不当可能导致 SQL 注入风险。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/__tests__/insightsBooking.integration-test.ts",
+  "line_number": [
+    481,
+    484
+  ],
+  "description": "误报：测试中使用 prisma.$queryRaw 执行原始 SQL 查询，但 baseConditions 由 Prisma.sql 模板字符串构造。Prisma.sql 是 Prisma 的参数化查询机制，${} 中的值会被作为绑定参数安全处理，而非字符串拼接。getBaseConditions()（insightsBooking.ts:48-60）内部调用的 buildAuthorizationConditions() 和 buildFilterConditions() 均使用 Prisma.sql 模板字符串，所有变量均通过参数化绑定传入，不存在 SQL 注入风险。",
+  "confidence": 0.1,
+  "severity": "info",
+  "suggestion": "无需修复。Prisma.sql 模板字符串天然提供参数化查询保护，所有 ${} 插值均为安全绑定参数。"
+}
+
+Risk Item:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/__tests__/insightsBooking.integration-test.ts",
+  "line_number": [
+    481,
+    484
+  ],
+  "description": "命中模式: Authorization_Data_Exposure-1\n测试中直接使用 Prisma.$queryRaw 执行原始 SQL 查询，若 baseConditions 构造不当可能导致 SQL 注入风险。",
+  "confidence": 0.3,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (11 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来分析这个风险项。首先，我需要了解 `getBaseConditions` 方法的实现，以及 `Prisma.$queryRaw` 的使用方式。
+
+## 步骤1：可证伪断言
+
+**断言**：测试中第481-484行使用 `prisma.$queryRaw` 执行原始 SQL 查询，其中 `baseConditions` 是 `Prisma.sql` 模板字符串，由于 Prisma 的模板字符串使用参数化查询，不存在 SQL 注入风险。
+
+**风险类型**：注入（SQL注入）
+
+## 步骤2：关键路径复原
+
+输入来源：`service.getBaseConditions()` → 返回 `Prisma.sql` 模板字符串 → 传入 `prisma.$queryRaw` 的 WHERE 子句 → 执行查询
+
+## 步骤3：定位证据
+
+让我先查看 `getBaseConditions` 和 `getAuthorizationConditions` 的实现。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "getBaseConditions",
+      "lang": "typescript",
+      "include_callsites": true
+    },
+    "id": "call_00_STDOHvCCPfSSfQHD5PdG7664",
+    "type": "tool_call"
+  },
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "getAuthorizationConditions",
+      "lang": "typescript",
+      "include_callsites": true
+    },
+    "id": "call_01_VrX8buTayQk50UFaTHyu3491",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_STDOHvCCPfSSfQHD5PdG7664
+Result:
+{
+    "rev": "head",
+    "query": "getBaseConditions",
+    "symbols": [],
+    "callsites": [],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 0,
+        "symbols_returned": 0,
+        "symbols_truncated": false,
+        "callsites_total": 0,
+        "callsites_returned": 0,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 252,
+        "approx_bytes_utf8": 252,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    },
+    "_hint": "No matches in current Lite-CPG DB (often diff/scoped). Call cpg_ast_index() to see indexed files; if the target file isn't indexed, fall back to run_grep with narrow include_patterns (e.g., a specific file path)."
+}
+
+Message 4 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_01_VrX8buTayQk50UFaTHyu3491
+Result:
+{
+    "rev": "head",
+    "query": "getAuthorizationConditions",
+    "symbols": [],
+    "callsites": [],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 0,
+        "symbols_returned": 0,
+        "symbols_truncated": false,
+        "callsites_total": 0,
+        "callsites_returned": 0,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 261,
+        "approx_bytes_utf8": 261,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    },
+    "_hint": "No matches in current Lite-CPG DB (often diff/scoped). Call cpg_ast_index() to see indexed files; if the target file isn't indexed, fall back to run_grep with narrow include_patterns (e.g., a specific file path)."
+}
+
+Message 5 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+CPG 没有索引到这些符号，让我查看索引范围，然后回退到 grep。
+Tool Calls:
+[
+  {
+    "name": "cpg_ast_index",
+    "args": {
+      "lang": "typescript",
+      "compact": true
+    },
+    "id": "call_00_iaVjcNs0R8JmErYZPwMM7726",
+    "type": "tool_call"
+  }
+]
+
+Message 6 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_ast_index
+Tool Call ID: call_00_iaVjcNs0R8JmErYZPwMM7726
+Result:
+{
+    "rev": "head",
+    "files": [
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\availability.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\constants.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\delegationCredential\\clientAndServer.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\logger.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\safeStringify.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\eventTypeSelect.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\repository\\membership.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\repository\\profile.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\repository\\team.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\repository\\teamUtils.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\repository\\user.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\insightsBooking.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\withSelectedCalendars.ts",
+            "lang": "typescript"
+        },
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\weekday.ts",
+            "lang": "typescript"
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "summary_only": true,
+        "files_total": 15,
+        "files_returned": 15,
+        "files_truncated": false,
+        "note": "file_paths not provided; returning files list only. Pass file_paths for defs/calls/imports."
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 2294,
+        "approx_bytes_utf8": 2294,
+        "keys": [
+            "_budget",
+            "error",
+            "files",
+            "rev"
+        ]
+    }
+}
+
+Message 7 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+好的，`insightsBooking.ts` 在索引中。让我查看它的实现。
+Tool Calls:
+[
+  {
+    "name": "read_file",
+    "args": {
+      "file_path": "packages/lib/server/service/insightsBooking.ts"
+    },
+    "id": "call_00_UBehV7ZoQ2Dqe82OlbGd6714",
+    "type": "tool_call"
+  }
+]
+
+Message 8 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file
+Tool Call ID: call_00_UBehV7ZoQ2Dqe82OlbGd6714
+Result:
+{
+    "content": "import { Prisma } from \"@prisma/client\";\nimport { z } from \"zod\";\n\nimport type { readonlyPrisma } from \"@calcom/prisma\";\nimport { MembershipRole } from \"@calcom/prisma/enums\";\n\nimport { MembershipRepository } from \"../repository/membership\";\nimport { TeamRepository } from \"../repository/team\";\n\nexport const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [\n  z.object({\n    scope: z.literal(\"user\"),\n    userId: z.number(),\n    orgId: z.number(),\n  }),\n  z.object({\n    scope: z.literal(\"org\"),\n    userId: z.number(),\n    orgId: z.number(),\n  }),\n  z.object({\n    scope: z.literal(\"team\"),\n    userId: z.number(),\n    orgId: z.number(),\n    teamId: z.number(),\n  }),\n]);\n\nexport type InsightsBookingServicePublicOptions = {\n  scope: \"user\" | \"org\" | \"team\";\n  userId: number;\n  orgId: number;\n  teamId?: number;\n};\n\nexport type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;\n\nexport type InsightsBookingServiceFilterOptions = {\n  eventTypeId?: number;\n  memberUserId?: number;\n};\n\nconst NOTHING_CONDITION = Prisma.sql`1=0`;\n\nexport class InsightsBookingService {\n  private prisma: typeof readonlyPrisma;\n  private options: InsightsBookingServiceOptions | null;\n  private filters?: InsightsBookingServiceFilterOptions;\n  private cachedAuthConditions?: Prisma.Sql;\n  private cachedFilterConditions?: Prisma.Sql | null;\n\n  constructor({\n    prisma,\n    options,\n    filters,\n  }: {\n    prisma: typeof readonlyPrisma;\n    options: InsightsBookingServicePublicOptions;\n    filters?: InsightsBookingServiceFilterOptions;\n  }) {\n    this.prisma = prisma;\n    const validation = insightsBookingServiceOptionsSchema.safeParse(options);\n    this.options = validation.success ? validation.data : null;\n\n    this.filters = filters;\n  }\n\n  async getBaseConditions(): Promise<Prisma.Sql> {\n    const authConditions = await this.getAuthorizationConditions();\n    const filterConditions = await this.getFilterConditions();\n\n    if (authConditions && filterConditions) {\n      return Prisma.sql`(${authConditions}) AND (${filterConditions})`;\n    } else if (authConditions) {\n      return authConditions;\n    } else if (filterConditions) {\n      return filterConditions;\n    } else {\n      return NOTHING_CONDITION;\n    }\n  }\n\n  async getAuthorizationConditions(): Promise<Prisma.Sql> {\n    if (this.cachedAuthConditions === undefined) {\n      this.cachedAuthConditions = await this.buildAuthorizationConditions();\n    }\n    return this.cachedAuthConditions;\n  }\n\n  async getFilterConditions(): Promise<Prisma.Sql | null> {\n    if (this.cachedFilterConditions === undefined) {\n      this.cachedFilterConditions = await this.buildFilterConditions();\n    }\n    return this.cachedFilterConditions;\n  }\n\n  async buildFilterConditions(): Promise<Prisma.Sql | null> {\n    const conditions: Prisma.Sql[] = [];\n\n    if (!this.filters) {\n      return null;\n    }\n\n    if (this.filters.eventTypeId) {\n      conditions.push(\n        Prisma.sql`(\"eventTypeId\" = ${this.filters.eventTypeId}) OR (\"eventParentId\" = ${this.filters.eventTypeId})`\n      );\n    }\n\n    if (this.filters.memberUserId) {\n      conditions.push(Prisma.sql`\"userId\" = ${this.filters.memberUserId}`);\n    }\n\n    if (conditions.length === 0) {\n      return null;\n    }\n\n    // Join all conditions with AND\n    return conditions.reduce((acc, condition, index) => {\n      if (index === 0) return condition;\n      return Prisma.sql`(${acc}) AND (${condition})`;\n    });\n  }\n\n  async buildAuthorizationConditions(): Promise<Prisma.Sql> {\n    if (!this.options) {\n      return NOTHING_CONDITION;\n    }\n    const isOwnerOrAdmin = await this.isOrgOwnerOrAdmin(this.options.userId, this.options.orgId);\n    if (!isOwnerOrAdmin) {\n      return NOTHING_CONDITION;\n    }\n\n    if (this.options.scope === \"user\") {\n      return Prisma.sql`(\"userId\" = ${this.options.userId}) AND (\"teamId\" IS NULL)`;\n    } else if (this.options.scope === \"org\") {\n      return await this.buildOrgAuthorizationCondition(this.options);\n    } else if (this.options.scope === \"team\") {\n      return await this.buildTeamAuthorizationCondition(this.options);\n    } else {\n      return NOTHING_CONDITION;\n    }\n  }\n\n  private async buildOrgAuthorizationCondition(\n    options: Extract<InsightsBookingServiceOptions, { scope: \"org\" }>\n  ): Promise<Prisma.Sql> {\n    // Get all teams from the organization\n    const teamRepo = new TeamRepository(this.prisma);\n    const teamsFromOrg = await teamRepo.findAllByParentId({\n      parentId: options.orgId,\n      select: { id: true },\n    });\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\n\n    // Get all users from the organization\n    const userIdsFromOrg =\n      teamsFromOrg.length > 0\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\n            (m) => m.userId\n          )\n        : [];\n\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\n\n    if (userIdsFromOrg.length > 0) {\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\n    }\n\n    return conditions.reduce((acc, condition, index) => {\n      if (index === 0) return condition;\n      return Prisma.sql`(${acc}) OR (${condition})`;\n    });\n  }\n\n  private async buildTeamAuthorizationCondition(\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\n  ): Promise<Prisma.Sql> {\n    const teamRepo = new TeamRepository(this.prisma);\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId({\n      id: options.teamId,\n      parentId: options.orgId,\n      select: { id: true },\n    });\n    if (!childTeamOfOrg) {\n      return NOTHING_CONDITION;\n    }\n\n    const usersFromTeam = await MembershipRepository.findAllByTeamIds({\n      teamIds: [options.teamId],\n      select: { userId: true },\n    });\n    const userIdsFromTeam = usersFromTeam.map((u) => u.userId);\n\n    const conditions: Prisma.Sql[] = [\n      Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,\n    ];\n\n    if (userIdsFromTeam.length > 0) {\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${userIdsFromTeam})) AND (\"isTeamBooking\" = false)`);\n    }\n\n    return conditions.reduce((acc, condition, index) => {\n      if (index === 0) return condition;\n      return Prisma.sql`(${acc}) OR (${condition})`;\n    });\n  }\n\n  private async isOrgOwnerOrAdmin(userId: number, orgId: number): Promise<boolean> {\n    // Check if the user is an owner or admin of the organization\n    const membership = await MembershipRepository.findUniqueByUserIdAndTeamId({ userId, teamId: orgId });\n    return Boolean(\n      membership &&\n        membership.accepted &&\n        membership.role &&\n        (membership.role === MembershipRole.OWNER || membership.role === MembershipRole.ADMIN)\n    );\n  }\n}\n",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\insightsBooking.ts",
+    "line_count": 220,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 9 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我已经看到了完整的实现。让我确认关键点：
+
+1. **`getBaseConditions`**（第48-60行）：组合 `authConditions` 和 `filterConditions`，全部使用 `Prisma.sql` 模板字符串
+2. **`buildAuthorizationConditions`**（第97-115行）：使用 `Prisma.sql` 模板字符串，参数通过 `${}` 注入（参数化）
+3. **`buildFilterConditions`**（第79-95行）：同样使用 `Prisma.sql` 模板字符串，参数通过 `${}` 注入
+
+关键发现：**所有 SQL 构建都使用 `Prisma.sql` 模板字符串**，这是 Prisma 的参数化查询机制。`${}` 中的值会被作为参数绑定，而不是字符串拼接。因此不存在 SQL 注入风险。
+
+让我再确认一下测试中第481-484行的具体上下文：
+Tool Calls:
+[
+  {
+    "name": "read_file_snippet",
+    "args": {
+      "file_path": "packages/lib/server/service/__tests__/insightsBooking.integration-test.ts",
+      "start_line": 475,
+      "end_line": 495,
+      "context_lines": 5
+    },
+    "id": "call_00_QN1987ipMQAeXAeDjwY78176",
+    "type": "tool_call"
+  }
+]
+
+Message 10 [Tool]:
+--------------------------------------------------------------------------------
+Tool: read_file_snippet
+Tool Call ID: call_00_QN1987ipMQAeXAeDjwY78176
+Result:
+{
+    "snippet": "470:         options: {\n471:           scope: \"user\",\n472:           userId: testData.user.id,\n473:           orgId: testData.org.id,\n474:         },\n475:         filters: {\n476:           eventTypeId: userEventType.id,\n477:         },\n478:       });\n479: \n480:       const baseConditions = await service.getBaseConditions();\n481:       const results = await prisma.$queryRaw<{ id: number }[]>`\n482:         SELECT id FROM \"BookingTimeStatusDenormalized\"\n483:         WHERE ${baseConditions}\n484:       `;\n485: \n486:       // Should return the user booking since it matches both conditions\n487:       expect(results).toEqual([\n488:         {\n489:           id: userBooking.id,\n490:         },\n491:       ]);\n492: \n493:       // Clean up\n494:       await prisma.booking.delete({\n495:         where: { id: userBooking.id },\n496:       });\n497:       await prisma.eventType.delete({\n498:         where: { id: userEventType.id },\n499:       });\n500:       await testData.cleanup();",
+    "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+    "range": [
+        470,
+        500
+    ],
+    "line_count": 503,
+    "encoding": "utf-8",
+    "error": null
+}
+
+Message 11 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在我有足够的信息来做出判断。
+
+## 分析结论
+
+**可证伪断言**：测试中第481-484行使用 `prisma.$queryRaw` 执行原始 SQL 查询，其中 `baseConditions` 由 `Prisma.sql` 模板字符串构造，由于 Prisma 的模板字符串使用参数化查询（`${}` 中的值被作为绑定参数处理），不存在 SQL 注入风险。
+
+**关键路径**：
+1. `service.getBaseConditions()` → 内部调用 `getAuthorizationConditions()` + `getFilterConditions()` → 全部使用 `Prisma.sql` 模板字符串
+2. `Prisma.sql` 是 Prisma 的参数化查询机制，`${value}` 中的值会被安全地作为参数绑定，而非字符串拼接
+3. 最终 `baseConditions` 被嵌入到 `prisma.$queryRaw` 的模板字符串中 → 安全执行
+
+**反证/保护机制**：
+- 第48-60行：`getBaseConditions()` 使用 `Prisma.sql` 模板字符串组合条件
+- 第79-95行：`buildFilterConditions()` 使用 `Prisma.sql` 模板字符串，`${this.filters.eventTypeId}` 和 `${this.filters.memberUserId}` 是参数化绑定
+- 第97-115行：`buildAuthorizationConditions()` 同样使用 `Prisma.sql` 模板字符串
+- 第10行：`NOTHING_CONDITION = Prisma.sql\`1=0\`` 也是安全的模板字符串
+
+**结论**：这是误报。`Prisma.sql` 模板字符串是 Prisma 提供的参数化查询机制，所有用户输入/变量都通过 `${}` 作为参数绑定，不存在 SQL 注入风险。
+
+```json
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/__tests__/insightsBooking.integration-test.ts",
+  "line_number": [481, 484],
+  "description": "误报：测试中使用 prisma.$queryRaw 执行原始 SQL 查询，但 baseConditions 由 Prisma.sql 模板字符串构造。Prisma.sql 是 Prisma 的参数化查询机制，${} 中的值会被作为绑定参数安全处理，而非字符串拼接。getBaseConditions()（insightsBooking.ts:48-60）内部调用的 buildAuthorizationConditions() 和 buildFilterConditions() 均使用 Prisma.sql 模板字符串，所有变量均通过参数化绑定传入，不存在 SQL 注入风险。",
+  "confidence": 0.1,
+  "severity": "info",
+  "suggestion": "无需修复。Prisma.sql 模板字符串天然提供参数化查询保护，所有 ${} 插值均为安全绑定参数。"
+}
+```
+
+
+Expert Analysis 2:
+================================================================================
+Risk Type: unknown
+File: packages/lib/server/service/insightsBooking.ts
+Line: (125, 143)
+Description: 命中模式: Authorization_Data_Exposure-3
+buildAuthorizationConditions 方法中，当 options 为 null 或用户非组织所有者/管理员时返回 NOTHING_CONDITION（1=0），但未对 options 中的 userId、orgId 等参数进行注入校验，直接拼接到 SQL 中。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [
+    125,
+    143
+  ],
+  "description": "误报：buildAuthorizationConditions 方法中，options 的 userId、orgId、teamId 等参数经过 Zod schema 校验（第10-27行，类型为 z.number()），并在构造函数中通过 safeParse 进行运行时校验（第62-63行）。所有 SQL 构建均使用 Prisma.sql 模板标签（参数化查询），而非字符串拼接，不存在 SQL 注入风险。此外，方法内部还通过 isOrgOwnerOrAdmin 进行了权限检查（第129行）。",
+  "confidence": 0.1,
+  "severity": "info",
+  "suggestion": "无需修复。当前实现已通过 Zod schema 类型校验和 Prisma.sql 参数化查询提供了充分的注入防护。"
+}
+
+Risk Item:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [
+    125,
+    143
+  ],
+  "description": "命中模式: Authorization_Data_Exposure-3\nbuildAuthorizationConditions 方法中，当 options 为 null 或用户非组织所有者/管理员时返回 NOTHING_CONDITION（1=0），但未对 options 中的 userId、orgId 等参数进行注入校验，直接拼接到 SQL 中。",
+  "confidence": 0.3,
+  "severity": "warning",
+  "suggestion": null
+}
+
+Conversation History (7 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来逐步分析这个风险项。
+
+## 步骤1：可证伪断言
+
+**断言**：`buildAuthorizationConditions` 方法中，`options` 的 `userId`、`orgId`、`teamId` 等参数未经注入校验直接拼接到 SQL 中，存在 SQL 注入风险。
+
+**安全问题类型**：SQL 注入（注入）
+
+## 步骤2：关键路径复原
+
+输入来源 → 校验/清洗 → 敏感操作点(Sink) → 输出
+
+1. **输入来源**：构造函数接收 `options: InsightsBookingServicePublicOptions`（第58行）
+2. **校验**：第62行 `insightsBookingServiceOptionsSchema.safeParse(options)` 使用 Zod schema 校验
+3. **敏感操作点**：第135行 `Prisma.sql`("userId" = ${this.options.userId})` 等使用 Prisma.sql 模板标签
+4. **输出**：返回 `Prisma.Sql` 对象，最终被 `getBaseConditions` 使用
+
+关键问题是：`Prisma.sql` 模板标签是否安全？它使用参数化查询还是字符串拼接？
+
+让我查看 Prisma 的 `sql` 模板标签行为来确认。
+
+## 步骤3：定位证据
+
+从代码中可以看到，所有 SQL 构建都使用 `Prisma.sql` 模板标签（如第135行、第164行等），并且参数通过 `${}` 插值传入。Prisma 的 `sql` 模板标签是**参数化查询**，不是字符串拼接。
+
+让我确认一下 Prisma.sql 的行为。
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "Prisma\\.sql",
+      "include_patterns": [
+        "packages/lib/server/service/insightsBooking.ts"
+      ],
+      "context_lines": 0
+    },
+    "id": "call_00_HWrh5PS7QWFrgUlgrTmW8141",
+    "type": "tool_call"
+  },
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "import.*Prisma.*from",
+      "include_patterns": [
+        "packages/lib/server/service/insightsBooking.ts"
+      ],
+      "context_lines": 0
+    },
+    "id": "call_01_ZyULjZWAikNixZyRCjij6731",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_HWrh5PS7QWFrgUlgrTmW8141
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 43,
+            "matched_line": "const NOTHING_CONDITION = Prisma.sql`1=0`;",
+            "context_start_line": 43,
+            "context_end_line": 43,
+            "context": [
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 73,
+            "matched_line": "      return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+            "context_start_line": 73,
+            "context_end_line": 73,
+            "context": [
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 106,
+            "matched_line": "        Prisma.sql`(\"eventTypeId\" = ${this.filters.eventTypeId}) OR (\"eventParentId\" = ${this.filters.eventTypeId})`",
+            "context_start_line": 106,
+            "context_end_line": 106,
+            "context": [
+                "106:         Prisma.sql`(\"eventTypeId\" = ${this.filters.eventTypeId}) OR (\"eventParentId\" = ${this.filters.eventTypeId})`"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 111,
+            "matched_line": "      conditions.push(Prisma.sql`\"userId\" = ${this.filters.memberUserId}`);",
+            "context_start_line": 111,
+            "context_end_line": 111,
+            "context": [
+                "111:       conditions.push(Prisma.sql`\"userId\" = ${this.filters.memberUserId}`);"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 121,
+            "matched_line": "      return Prisma.sql`(${acc}) AND (${condition})`;",
+            "context_start_line": 121,
+            "context_end_line": 121,
+            "context": [
+                "121:       return Prisma.sql`(${acc}) AND (${condition})`;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 135,
+            "matched_line": "      return Prisma.sql`(\"userId\" = ${this.options.userId}) AND (\"teamId\" IS NULL)`;",
+            "context_start_line": 135,
+            "context_end_line": 135,
+            "context": [
+                "135:       return Prisma.sql`(\"userId\" = ${this.options.userId}) AND (\"teamId\" IS NULL)`;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 164,
+            "matched_line": "    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];",
+            "context_start_line": 164,
+            "context_end_line": 164,
+            "context": [
+                "164:     const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 168,
+            "matched_line": "      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);",
+            "context_start_line": 168,
+            "context_end_line": 168,
+            "context": [
+                "168:       conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 173,
+            "matched_line": "      return Prisma.sql`(${acc}) OR (${condition})`;",
+            "context_start_line": 173,
+            "context_end_line": 173,
+            "context": [
+                "173:       return Prisma.sql`(${acc}) OR (${condition})`;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 197,
+            "matched_line": "      Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,",
+            "context_start_line": 197,
+            "context_end_line": 197,
+            "context": [
+                "197:       Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,"
+            ]
+        }
+    ],
+    "total": 10,
+    "truncated": true,
+    "max_results": 10,
+    "message": "Results truncated at max_results; rerun with higher max_results or narrower include_patterns."
+}
+
+Message 4 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_01_ZyULjZWAikNixZyRCjij6731
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 1,
+            "matched_line": "import { Prisma } from \"@prisma/client\";",
+            "context_start_line": 1,
+            "context_end_line": 1,
+            "context": [
+                "1: import { Prisma } from \"@prisma/client\";"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 4,
+            "matched_line": "import type { readonlyPrisma } from \"@calcom/prisma\";",
+            "context_start_line": 4,
+            "context_end_line": 4,
+            "context": [
+                "4: import type { readonlyPrisma } from \"@calcom/prisma\";"
+            ]
+        }
+    ],
+    "total": 2,
+    "truncated": false
+}
+
+Message 5 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+现在让我确认一下 `Prisma.sql` 模板标签的行为——它是 Prisma 提供的参数化查询机制，不是字符串拼接。
+
+让我也看看 Zod schema 的校验逻辑，确认输入是否被正确类型化：
+
+从代码中已经可以看到：
+1. **第1行**：`import { Prisma } from "@prisma/client"` — 使用 Prisma 官方客户端
+2. **第10-27行**：Zod schema 定义了 `userId: z.number()`, `orgId: z.number()`, `teamId: z.number()` — 所有参数都是 number 类型
+3. **第62行**：`insightsBookingServiceOptionsSchema.safeParse(options)` — 使用 Zod 进行运行时校验
+4. **第63行**：`this.options = validation.success ? validation.data : null` — 校验失败则设为 null
+
+现在让我确认 `Prisma.sql` 模板标签是否使用参数化查询（安全）还是字符串拼接（不安全）。
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "Prisma\\.sql",
+      "include_patterns": [
+        "*.ts",
+        "*.js"
+      ],
+      "max_results": 5,
+      "context_lines": 3
+    },
+    "id": "call_00_QAlYwfl9B4B2bwALKyJZ6020",
+    "type": "tool_call"
+  }
+]
+
+Message 6 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_QAlYwfl9B4B2bwALKyJZ6020
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\features\\flags\\features.repository.ts",
+            "line_number": 153,
+            "matched_line": "      const query = Prisma.sql`",
+            "context_start_line": 150,
+            "context_end_line": 156,
+            "context": [
+                "150:    */",
+                "151:   private async checkIfUserBelongsToTeamWithFeature(userId: number, slug: string) {",
+                "152:     try {",
+                "153:       const query = Prisma.sql`",
+                "154:         WITH RECURSIVE TeamHierarchy AS (",
+                "155:           -- Start with teams the user belongs to",
+                "156:           SELECT DISTINCT t.id, t.\"parentId\","
+            ]
+        },
+        {
+            "file": "packages\\features\\flags\\features.repository.ts",
+            "line_number": 212,
+            "matched_line": "      const query = Prisma.sql`",
+            "context_start_line": 209,
+            "context_end_line": 215,
+            "context": [
+                "209:       });",
+                "210:       if (teamHasFeature) return true;",
+                "211: ",
+                "212:       const query = Prisma.sql`",
+                "213:         WITH RECURSIVE TeamHierarchy AS (",
+                "214:           -- Start with the initial team",
+                "215:           SELECT id, \"parentId\","
+            ]
+        },
+        {
+            "file": "packages\\features\\insights\\server\\routing-events.ts",
+            "line_number": 525,
+            "matched_line": "      ? Prisma.sql`AND ${Prisma.raw(teamConditions.join(\" AND \"))}`",
+            "context_start_line": 522,
+            "context_end_line": 528,
+            "context": [
+                "522:     }",
+                "523: ",
+                "524:     const whereClause = teamConditions.length",
+                "525:       ? Prisma.sql`AND ${Prisma.raw(teamConditions.join(\" AND \"))}`",
+                "526:       : Prisma.sql``;",
+                "527: ",
+                "528:     // If you're at this point wondering what this does. This groups the responses by form and field and counts the number of responses for each option that don't have a booking."
+            ]
+        },
+        {
+            "file": "packages\\features\\insights\\server\\routing-events.ts",
+            "line_number": 526,
+            "matched_line": "      : Prisma.sql``;",
+            "context_start_line": 523,
+            "context_end_line": 529,
+            "context": [
+                "523: ",
+                "524:     const whereClause = teamConditions.length",
+                "525:       ? Prisma.sql`AND ${Prisma.raw(teamConditions.join(\" AND \"))}`",
+                "526:       : Prisma.sql``;",
+                "527: ",
+                "528:     // If you're at this point wondering what this does. This groups the responses by form and field and counts the number of responses for each option that don't have a booking.",
+                "529:     const result = await prisma.$queryRaw<"
+            ]
+        },
+        {
+            "file": "packages\\features\\insights\\server\\routing-events.ts",
+            "line_number": 749,
+            "matched_line": "      ? Prisma.sql`AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})`",
+            "context_start_line": 746,
+            "context_end_line": 752,
+            "context": [
+                "746:     }",
+                "747: ",
+                "748:     const searchCondition = searchQuery",
+                "749:       ? Prisma.sql`AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})`",
+                "750:       : Prisma.empty;",
+                "751: ",
+                "752:     const whereClause = teamConditions.length"
+            ]
+        }
+    ],
+    "total": 5,
+    "truncated": true,
+    "max_results": 5,
+    "message": "Results truncated at max_results; rerun with higher max_results or narrower include_patterns."
+}
+
+Message 7 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+很好，我看到了关键证据。注意第525行使用了 `Prisma.raw()` — 这是 Prisma 中明确用于**原始字符串拼接**的方法，而 `Prisma.sql` 模板标签是**参数化查询**。
+
+现在让我确认 `Prisma.sql` 模板标签的参数化行为。在 Prisma 中，`Prisma.sql` 是一个模板标签函数，它使用参数化查询（prepared statements），`${}` 中的值会被作为参数绑定，而不是直接拼接到 SQL 字符串中。这意味着**不存在 SQL 注入风险**。
+
+让我再确认一下 Zod schema 对输入的类型约束：
+
+从代码第10-27行已经明确看到：
+- `userId: z.number()` — 必须是 number
+- `orgId: z.number()` — 必须是 number  
+- `teamId: z.number()` — 必须是 number（仅 team scope）
+
+这些值经过 Zod 校验后，在运行时一定是 number 类型，再通过 `Prisma.sql` 的参数化绑定传入，不存在注入路径。
+
+## 步骤4：找反证/保护
+
+**反证（保护措施）**：
+1. **第10-27行**：Zod schema `insightsBookingServiceOptionsSchema` 严格定义了 `userId`、`orgId`、`teamId` 为 `z.number()` 类型
+2. **第62-63行**：构造函数中使用 `safeParse` 进行运行时校验，校验失败则 `this.options = null`
+3. **第126-128行**：`buildAuthorizationConditions` 中，如果 `this.options` 为 null，直接返回 `NOTHING_CONDITION`（1=0）
+4. **所有 SQL 构建使用 `Prisma.sql` 模板标签**：这是 Prisma 的参数化查询机制，`${}` 中的值被作为参数绑定，不是字符串拼接
+5. **第129行**：`isOrgOwnerOrAdmin` 权限检查 — 只有组织所有者/管理员才能通过
+
+**结论**：原始风险描述中提到的"未对 options 中的 userId、orgId 等参数进行注入校验，直接拼接到 SQL 中"是**误报**。因为：
+- Zod schema 已经做了类型校验（必须是 number）
+- `Prisma.sql` 使用参数化查询，不存在 SQL 注入风险
+
+```json
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [125, 143],
+  "description": "误报：buildAuthorizationConditions 方法中，options 的 userId、orgId、teamId 等参数经过 Zod schema 校验（第10-27行，类型为 z.number()），并在构造函数中通过 safeParse 进行运行时校验（第62-63行）。所有 SQL 构建均使用 Prisma.sql 模板标签（参数化查询），而非字符串拼接，不存在 SQL 注入风险。此外，方法内部还通过 isOrgOwnerOrAdmin 进行了权限检查（第129行）。",
+  "confidence": 0.1,
+  "severity": "info",
+  "suggestion": "无需修复。当前实现已通过 Zod schema 类型校验和 Prisma.sql 参数化查询提供了充分的注入防护。"
+}
+```
+
+
+Expert Analysis 3:
+================================================================================
+Risk Type: unknown
+File: packages/lib/server/service/insightsBooking.ts
+Line: (97, 123)
+Description: 命中模式: Authorization_Data_Exposure-1
+buildFilterConditions 方法中，将 this.filters.eventTypeId 和 this.filters.memberUserId 直接拼接到 Prisma.sql 模板中，虽然 Prisma 模板会进行参数化处理，但若 filter 对象来自用户输入且未经过充分校验，仍存在 SQL 注入风险。
+--------------------------------------------------------------------------------
+
+Analysis Result:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [
+    97,
+    123
+  ],
+  "description": "误报：buildFilterConditions 方法中 this.filters.eventTypeId 和 this.filters.memberUserId 被传入 Prisma.sql 模板。Prisma.sql 是参数化模板标签，${...} 插值会被转换为参数占位符（如 $1, $2），而非直接拼接字符串，因此不存在 SQL 注入风险。此外，filters 的类型定义为 number（第38-41行），且最终查询条件会与鉴权条件（buildAuthorizationConditions，第125-143行）通过 AND 组合，确保只有组织 Owner/Admin 才能访问数据。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。Prisma.sql 使用参数化查询，${...} 插值是安全的。"
+}
+
+Risk Item:
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [
+    97,
+    123
+  ],
+  "description": "命中模式: Authorization_Data_Exposure-1\nbuildFilterConditions 方法中，将 this.filters.eventTypeId 和 this.filters.memberUserId 直接拼接到 Prisma.sql 模板中，虽然 Prisma 模板会进行参数化处理，但若 filter 对象来自用户输入且未经过充分校验，仍存在 SQL 注入风险。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": null
+}
+
+Conversation History (16 messages):
+================================================================================
+
+Message 1 [Human]:
+--------------------------------------------------------------------------------
+请分析上述风险项。如果需要更多信息，请调用工具。分析完成后，请输出最终的 JSON 结果。
+
+Message 2 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+我来逐步分析这个风险项。
+
+## 1. 可证伪断言
+
+**断言**：`buildFilterConditions` 方法中，`this.filters.eventTypeId` 和 `this.filters.memberUserId` 被直接传入 `Prisma.sql` 模板，由于 `Prisma.sql` 使用参数化查询（`${...}` 会被转为参数占位符），因此不存在 SQL 注入风险。
+
+**风险类型**：注入（SQL 注入）
+
+## 2. 关键路径复原
+
+**输入来源**：`this.filters`（类型为 `InsightsBookingServiceFilterOptions`，在构造函数中赋值，第65行）
+
+**校验/清洗**：无显式校验——`InsightsBookingServiceFilterOptions` 类型定义（第38-41行）中 `eventTypeId` 和 `memberUserId` 均为 `number` 类型，但 TypeScript 类型在运行时不会强制校验。
+
+**敏感操作点(Sink)**：第105-107行和第111行，`Prisma.sql` 模板中直接插值 `this.filters.eventTypeId` 和 `this.filters.memberUserId`。
+
+**输出/副作用**：生成的 SQL 条件被用于数据库查询。
+
+## 3. 定位证据
+
+关键问题是：`Prisma.sql` 的 `${...}` 插值是否安全？
+
+根据 Prisma 官方文档，`Prisma.sql` 模板标签会将插值参数自动转换为参数化查询（prepared statement），而不是直接拼接字符串。这意味着 `${this.filters.eventTypeId}` 会被转为 `$1` 占位符，值作为独立参数传递，从而防止 SQL 注入。
+
+让我确认一下 `filters` 的来源，看看是否有用户输入直接流入。
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "InsightsBookingService",
+      "include_callsites": true
+    },
+    "id": "call_00_nZ5tNaWBeeusLvQustWG5874",
+    "type": "tool_call"
+  }
+]
+
+Message 3 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_nZ5tNaWBeeusLvQustWG5874
+Result:
+{
+    "rev": "head",
+    "query": "InsightsBookingService",
+    "symbols": [
+        {
+            "symbol_id": "79dd689c8ee779357acca7d6ef5c14138ac4b21f881166942f21c9e517a66cda:1137-7117",
+            "name": "InsightsBookingService",
+            "kind": "type",
+            "lang": "typescript",
+            "location": {
+                "file_path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\insightsBooking.ts",
+                "start_line": 45,
+                "start_col": 8,
+                "end_line": 220,
+                "end_col": 2
+            }
+        }
+    ],
+    "callsites": [],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 1,
+        "symbols_returned": 1,
+        "symbols_truncated": false,
+        "callsites_total": 0,
+        "callsites_returned": 0,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 610,
+        "approx_bytes_utf8": 610,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    }
+}
+
+Message 4 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "new InsightsBookingService",
+      "include_patterns": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "max_results": 10
+    },
+    "id": "call_00_lk3UENa1ESrkpe7b1JYG1163",
+    "type": "tool_call"
+  }
+]
+
+Message 5 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_lk3UENa1ESrkpe7b1JYG1163
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 204,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 174,
+            "context_end_line": 234,
+            "context": [
+                "174: ",
+                "175:       // Clean up main test data",
+                "176:       await prisma.booking.deleteMany({",
+                "177:         where: { id: booking.id },",
+                "178:       });",
+                "179:       await prisma.eventType.deleteMany({",
+                "180:         where: { id: eventType.id },",
+                "181:       });",
+                "182:       await prisma.membership.deleteMany({",
+                "183:         where: { id: membership.id },",
+                "184:       });",
+                "185:       await prisma.membership.delete({",
+                "186:         where: { id: orgMembership.id },",
+                "187:       });",
+                "188:       await prisma.team.deleteMany({",
+                "189:         where: { id: team.id },",
+                "190:       });",
+                "191:       await prisma.team.deleteMany({",
+                "192:         where: { id: org.id },",
+                "193:       });",
+                "194:       await prisma.user.deleteMany({",
+                "195:         where: { id: user.id },",
+                "196:       });",
+                "197:     },",
+                "198:   };",
+                "199: }",
+                "200: ",
+                "201: describe(\"InsightsBookingService Integration Tests\", () => {",
+                "202:   describe(\"Authorization Conditions\", () => {",
+                "203:     it(\"should return NOTHING for invalid options\", async () => {",
+                "204:       const service = new InsightsBookingService({",
+                "205:         prisma,",
+                "206:         options: null as any,",
+                "207:       });",
+                "208: ",
+                "209:       const conditions = await service.getAuthorizationConditions();",
+                "210:       expect(conditions).toEqual(NOTHING_CONDITION);",
+                "211:     });",
+                "212: ",
+                "213:     it(\"should return NOTHING for non-owner/admin user\", async () => {",
+                "214:       const testData = await createTestData();",
+                "215: ",
+                "216:       // Create a regular user who is not an owner/admin",
+                "217:       const regularUser = await prisma.user.create({",
+                "218:         data: {",
+                "219:           email: `regular-user-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,",
+                "220:           username: `regularuser-${Date.now()}-${Math.random().toString(36).substring(7)}`,",
+                "221:           name: \"Regular User\",",
+                "222:         },",
+                "223:       });",
+                "224: ",
+                "225:       // Add the user as a regular member (not owner/admin) to the organization",
+                "226:       const membership = await prisma.membership.create({",
+                "227:         data: {",
+                "228:           userId: regularUser.id,",
+                "229:           teamId: testData.org.id,",
+                "230:           role: MembershipRole.MEMBER,",
+                "231:           accepted: true,",
+                "232:         },",
+                "233:       });",
+                "234: "
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 235,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 205,
+            "context_end_line": 265,
+            "context": [
+                "205:         prisma,",
+                "206:         options: null as any,",
+                "207:       });",
+                "208: ",
+                "209:       const conditions = await service.getAuthorizationConditions();",
+                "210:       expect(conditions).toEqual(NOTHING_CONDITION);",
+                "211:     });",
+                "212: ",
+                "213:     it(\"should return NOTHING for non-owner/admin user\", async () => {",
+                "214:       const testData = await createTestData();",
+                "215: ",
+                "216:       // Create a regular user who is not an owner/admin",
+                "217:       const regularUser = await prisma.user.create({",
+                "218:         data: {",
+                "219:           email: `regular-user-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,",
+                "220:           username: `regularuser-${Date.now()}-${Math.random().toString(36).substring(7)}`,",
+                "221:           name: \"Regular User\",",
+                "222:         },",
+                "223:       });",
+                "224: ",
+                "225:       // Add the user as a regular member (not owner/admin) to the organization",
+                "226:       const membership = await prisma.membership.create({",
+                "227:         data: {",
+                "228:           userId: regularUser.id,",
+                "229:           teamId: testData.org.id,",
+                "230:           role: MembershipRole.MEMBER,",
+                "231:           accepted: true,",
+                "232:         },",
+                "233:       });",
+                "234: ",
+                "235:       const service = new InsightsBookingService({",
+                "236:         prisma,",
+                "237:         options: {",
+                "238:           scope: \"org\",",
+                "239:           userId: regularUser.id,",
+                "240:           orgId: testData.org.id,",
+                "241:         },",
+                "242:       });",
+                "243: ",
+                "244:       const conditions = await service.getAuthorizationConditions();",
+                "245:       expect(conditions).toEqual(NOTHING_CONDITION);",
+                "246: ",
+                "247:       // Clean up",
+                "248:       await prisma.membership.delete({",
+                "249:         where: { id: membership.id },",
+                "250:       });",
+                "251:       await prisma.user.delete({",
+                "252:         where: { id: regularUser.id },",
+                "253:       });",
+                "254:       await testData.cleanup();",
+                "255:     });",
+                "256: ",
+                "257:     it(\"should build user scope conditions\", async () => {",
+                "258:       const testData = await createTestData({",
+                "259:         teamRole: MembershipRole.OWNER,",
+                "260:         orgRole: MembershipRole.OWNER,",
+                "261:       });",
+                "262: ",
+                "263:       const service = new InsightsBookingService({",
+                "264:         prisma,",
+                "265:         options: {"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 263,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 233,
+            "context_end_line": 293,
+            "context": [
+                "233:       });",
+                "234: ",
+                "235:       const service = new InsightsBookingService({",
+                "236:         prisma,",
+                "237:         options: {",
+                "238:           scope: \"org\",",
+                "239:           userId: regularUser.id,",
+                "240:           orgId: testData.org.id,",
+                "241:         },",
+                "242:       });",
+                "243: ",
+                "244:       const conditions = await service.getAuthorizationConditions();",
+                "245:       expect(conditions).toEqual(NOTHING_CONDITION);",
+                "246: ",
+                "247:       // Clean up",
+                "248:       await prisma.membership.delete({",
+                "249:         where: { id: membership.id },",
+                "250:       });",
+                "251:       await prisma.user.delete({",
+                "252:         where: { id: regularUser.id },",
+                "253:       });",
+                "254:       await testData.cleanup();",
+                "255:     });",
+                "256: ",
+                "257:     it(\"should build user scope conditions\", async () => {",
+                "258:       const testData = await createTestData({",
+                "259:         teamRole: MembershipRole.OWNER,",
+                "260:         orgRole: MembershipRole.OWNER,",
+                "261:       });",
+                "262: ",
+                "263:       const service = new InsightsBookingService({",
+                "264:         prisma,",
+                "265:         options: {",
+                "266:           scope: \"user\",",
+                "267:           userId: testData.user.id,",
+                "268:           orgId: testData.org.id,",
+                "269:         },",
+                "270:       });",
+                "271: ",
+                "272:       const conditions = await service.getAuthorizationConditions();",
+                "273:       expect(conditions).toEqual(Prisma.sql`(\"userId\" = ${testData.user.id}) AND (\"teamId\" IS NULL)`);",
+                "274: ",
+                "275:       await testData.cleanup();",
+                "276:     });",
+                "277: ",
+                "278:     it(\"should build team scope conditions\", async () => {",
+                "279:       const testData = await createTestData({",
+                "280:         teamRole: MembershipRole.OWNER,",
+                "281:         orgRole: MembershipRole.OWNER,",
+                "282:       });",
+                "283: ",
+                "284:       const service = new InsightsBookingService({",
+                "285:         prisma,",
+                "286:         options: {",
+                "287:           scope: \"team\",",
+                "288:           userId: testData.user.id,",
+                "289:           orgId: testData.org.id,",
+                "290:           teamId: testData.team.id,",
+                "291:         },",
+                "292:       });",
+                "293: "
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 284,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 254,
+            "context_end_line": 314,
+            "context": [
+                "254:       await testData.cleanup();",
+                "255:     });",
+                "256: ",
+                "257:     it(\"should build user scope conditions\", async () => {",
+                "258:       const testData = await createTestData({",
+                "259:         teamRole: MembershipRole.OWNER,",
+                "260:         orgRole: MembershipRole.OWNER,",
+                "261:       });",
+                "262: ",
+                "263:       const service = new InsightsBookingService({",
+                "264:         prisma,",
+                "265:         options: {",
+                "266:           scope: \"user\",",
+                "267:           userId: testData.user.id,",
+                "268:           orgId: testData.org.id,",
+                "269:         },",
+                "270:       });",
+                "271: ",
+                "272:       const conditions = await service.getAuthorizationConditions();",
+                "273:       expect(conditions).toEqual(Prisma.sql`(\"userId\" = ${testData.user.id}) AND (\"teamId\" IS NULL)`);",
+                "274: ",
+                "275:       await testData.cleanup();",
+                "276:     });",
+                "277: ",
+                "278:     it(\"should build team scope conditions\", async () => {",
+                "279:       const testData = await createTestData({",
+                "280:         teamRole: MembershipRole.OWNER,",
+                "281:         orgRole: MembershipRole.OWNER,",
+                "282:       });",
+                "283: ",
+                "284:       const service = new InsightsBookingService({",
+                "285:         prisma,",
+                "286:         options: {",
+                "287:           scope: \"team\",",
+                "288:           userId: testData.user.id,",
+                "289:           orgId: testData.org.id,",
+                "290:           teamId: testData.team.id,",
+                "291:         },",
+                "292:       });",
+                "293: ",
+                "294:       const conditions = await service.getAuthorizationConditions();",
+                "295:       expect(conditions).toEqual(",
+                "296:         Prisma.sql`((\"teamId\" = ${testData.team.id}) AND (\"isTeamBooking\" = true)) OR ((\"userId\" = ANY(${[",
+                "297:           testData.user.id,",
+                "298:         ]})) AND (\"isTeamBooking\" = false))`",
+                "299:       );",
+                "300: ",
+                "301:       // Clean up",
+                "302:       await testData.cleanup();",
+                "303:     });",
+                "304: ",
+                "305:     it(\"should build org scope conditions\", async () => {",
+                "306:       const testData = await createTestData({",
+                "307:         teamRole: MembershipRole.OWNER,",
+                "308:         orgRole: MembershipRole.OWNER,",
+                "309:         moreTeamsAndUsers: [",
+                "310:           [MembershipRole.MEMBER], // Team 2: 1 user with MEMBER role",
+                "311:           [MembershipRole.MEMBER], // Team 3: 1 user with MEMBER role",
+                "312:         ],",
+                "313:       });",
+                "314: "
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 321,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 291,
+            "context_end_line": 351,
+            "context": [
+                "291:         },",
+                "292:       });",
+                "293: ",
+                "294:       const conditions = await service.getAuthorizationConditions();",
+                "295:       expect(conditions).toEqual(",
+                "296:         Prisma.sql`((\"teamId\" = ${testData.team.id}) AND (\"isTeamBooking\" = true)) OR ((\"userId\" = ANY(${[",
+                "297:           testData.user.id,",
+                "298:         ]})) AND (\"isTeamBooking\" = false))`",
+                "299:       );",
+                "300: ",
+                "301:       // Clean up",
+                "302:       await testData.cleanup();",
+                "303:     });",
+                "304: ",
+                "305:     it(\"should build org scope conditions\", async () => {",
+                "306:       const testData = await createTestData({",
+                "307:         teamRole: MembershipRole.OWNER,",
+                "308:         orgRole: MembershipRole.OWNER,",
+                "309:         moreTeamsAndUsers: [",
+                "310:           [MembershipRole.MEMBER], // Team 2: 1 user with MEMBER role",
+                "311:           [MembershipRole.MEMBER], // Team 3: 1 user with MEMBER role",
+                "312:         ],",
+                "313:       });",
+                "314: ",
+                "315:       // Get references to additional data",
+                "316:       const user2 = testData.additionalUsers[0]; // First user from first team",
+                "317:       const user3 = testData.additionalUsers[1]; // First user from second team",
+                "318:       const team2 = testData.additionalTeams[0]; // First additional team",
+                "319:       const team3 = testData.additionalTeams[1]; // Second additional team",
+                "320: ",
+                "321:       const service = new InsightsBookingService({",
+                "322:         prisma,",
+                "323:         options: {",
+                "324:           scope: \"org\",",
+                "325:           userId: testData.user.id,",
+                "326:           orgId: testData.org.id,",
+                "327:         },",
+                "328:       });",
+                "329: ",
+                "330:       const conditions = await service.getAuthorizationConditions();",
+                "331: ",
+                "332:       expect(conditions).toEqual(",
+                "333:         Prisma.sql`((\"teamId\" = ANY(${[",
+                "334:           testData.org.id,",
+                "335:           testData.team.id,",
+                "336:           team2.id,",
+                "337:           team3.id,",
+                "338:         ]})) AND (\"isTeamBooking\" = true)) OR ((\"userId\" = ANY(${[",
+                "339:           testData.user.id,",
+                "340:           user2.id,",
+                "341:           user3.id,",
+                "342:         ]})) AND (\"isTeamBooking\" = false))`",
+                "343:       );",
+                "344: ",
+                "345:       await testData.cleanup();",
+                "346:     });",
+                "347:   });",
+                "348: ",
+                "349:   describe(\"Filter Conditions\", () => {",
+                "350:     it(\"should return null when no filters are provided\", async () => {",
+                "351:       const testData = await createTestData();"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 353,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 323,
+            "context_end_line": 383,
+            "context": [
+                "323:         options: {",
+                "324:           scope: \"org\",",
+                "325:           userId: testData.user.id,",
+                "326:           orgId: testData.org.id,",
+                "327:         },",
+                "328:       });",
+                "329: ",
+                "330:       const conditions = await service.getAuthorizationConditions();",
+                "331: ",
+                "332:       expect(conditions).toEqual(",
+                "333:         Prisma.sql`((\"teamId\" = ANY(${[",
+                "334:           testData.org.id,",
+                "335:           testData.team.id,",
+                "336:           team2.id,",
+                "337:           team3.id,",
+                "338:         ]})) AND (\"isTeamBooking\" = true)) OR ((\"userId\" = ANY(${[",
+                "339:           testData.user.id,",
+                "340:           user2.id,",
+                "341:           user3.id,",
+                "342:         ]})) AND (\"isTeamBooking\" = false))`",
+                "343:       );",
+                "344: ",
+                "345:       await testData.cleanup();",
+                "346:     });",
+                "347:   });",
+                "348: ",
+                "349:   describe(\"Filter Conditions\", () => {",
+                "350:     it(\"should return null when no filters are provided\", async () => {",
+                "351:       const testData = await createTestData();",
+                "352: ",
+                "353:       const service = new InsightsBookingService({",
+                "354:         prisma,",
+                "355:         options: {",
+                "356:           scope: \"user\",",
+                "357:           userId: testData.user.id,",
+                "358:           orgId: testData.org.id,",
+                "359:         },",
+                "360:       });",
+                "361: ",
+                "362:       const conditions = await service.getFilterConditions();",
+                "363:       expect(conditions).toBeNull();",
+                "364: ",
+                "365:       await testData.cleanup();",
+                "366:     });",
+                "367: ",
+                "368:     it(\"should build eventTypeId filter conditions\", async () => {",
+                "369:       const testData = await createTestData();",
+                "370: ",
+                "371:       const service = new InsightsBookingService({",
+                "372:         prisma,",
+                "373:         options: {",
+                "374:           scope: \"user\",",
+                "375:           userId: testData.user.id,",
+                "376:           orgId: testData.org.id,",
+                "377:         },",
+                "378:         filters: {",
+                "379:           eventTypeId: testData.eventType.id,",
+                "380:         },",
+                "381:       });",
+                "382: ",
+                "383:       const conditions = await service.getFilterConditions();"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 371,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 341,
+            "context_end_line": 401,
+            "context": [
+                "341:           user3.id,",
+                "342:         ]})) AND (\"isTeamBooking\" = false))`",
+                "343:       );",
+                "344: ",
+                "345:       await testData.cleanup();",
+                "346:     });",
+                "347:   });",
+                "348: ",
+                "349:   describe(\"Filter Conditions\", () => {",
+                "350:     it(\"should return null when no filters are provided\", async () => {",
+                "351:       const testData = await createTestData();",
+                "352: ",
+                "353:       const service = new InsightsBookingService({",
+                "354:         prisma,",
+                "355:         options: {",
+                "356:           scope: \"user\",",
+                "357:           userId: testData.user.id,",
+                "358:           orgId: testData.org.id,",
+                "359:         },",
+                "360:       });",
+                "361: ",
+                "362:       const conditions = await service.getFilterConditions();",
+                "363:       expect(conditions).toBeNull();",
+                "364: ",
+                "365:       await testData.cleanup();",
+                "366:     });",
+                "367: ",
+                "368:     it(\"should build eventTypeId filter conditions\", async () => {",
+                "369:       const testData = await createTestData();",
+                "370: ",
+                "371:       const service = new InsightsBookingService({",
+                "372:         prisma,",
+                "373:         options: {",
+                "374:           scope: \"user\",",
+                "375:           userId: testData.user.id,",
+                "376:           orgId: testData.org.id,",
+                "377:         },",
+                "378:         filters: {",
+                "379:           eventTypeId: testData.eventType.id,",
+                "380:         },",
+                "381:       });",
+                "382: ",
+                "383:       const conditions = await service.getFilterConditions();",
+                "384:       expect(conditions).toEqual(",
+                "385:         Prisma.sql`(\"eventTypeId\" = ${testData.eventType.id}) OR (\"eventParentId\" = ${testData.eventType.id})`",
+                "386:       );",
+                "387: ",
+                "388:       await testData.cleanup();",
+                "389:     });",
+                "390: ",
+                "391:     it(\"should build memberUserId filter conditions\", async () => {",
+                "392:       const testData = await createTestData();",
+                "393: ",
+                "394:       const service = new InsightsBookingService({",
+                "395:         prisma,",
+                "396:         options: {",
+                "397:           scope: \"user\",",
+                "398:           userId: testData.user.id,",
+                "399:           orgId: testData.org.id,",
+                "400:         },",
+                "401:         filters: {"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 394,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 364,
+            "context_end_line": 424,
+            "context": [
+                "364: ",
+                "365:       await testData.cleanup();",
+                "366:     });",
+                "367: ",
+                "368:     it(\"should build eventTypeId filter conditions\", async () => {",
+                "369:       const testData = await createTestData();",
+                "370: ",
+                "371:       const service = new InsightsBookingService({",
+                "372:         prisma,",
+                "373:         options: {",
+                "374:           scope: \"user\",",
+                "375:           userId: testData.user.id,",
+                "376:           orgId: testData.org.id,",
+                "377:         },",
+                "378:         filters: {",
+                "379:           eventTypeId: testData.eventType.id,",
+                "380:         },",
+                "381:       });",
+                "382: ",
+                "383:       const conditions = await service.getFilterConditions();",
+                "384:       expect(conditions).toEqual(",
+                "385:         Prisma.sql`(\"eventTypeId\" = ${testData.eventType.id}) OR (\"eventParentId\" = ${testData.eventType.id})`",
+                "386:       );",
+                "387: ",
+                "388:       await testData.cleanup();",
+                "389:     });",
+                "390: ",
+                "391:     it(\"should build memberUserId filter conditions\", async () => {",
+                "392:       const testData = await createTestData();",
+                "393: ",
+                "394:       const service = new InsightsBookingService({",
+                "395:         prisma,",
+                "396:         options: {",
+                "397:           scope: \"user\",",
+                "398:           userId: testData.user.id,",
+                "399:           orgId: testData.org.id,",
+                "400:         },",
+                "401:         filters: {",
+                "402:           memberUserId: testData.user.id,",
+                "403:         },",
+                "404:       });",
+                "405: ",
+                "406:       const conditions = await service.getFilterConditions();",
+                "407:       expect(conditions).toEqual(Prisma.sql`\"userId\" = ${testData.user.id}`);",
+                "408: ",
+                "409:       await testData.cleanup();",
+                "410:     });",
+                "411: ",
+                "412:     it(\"should combine multiple filter conditions\", async () => {",
+                "413:       const testData = await createTestData();",
+                "414: ",
+                "415:       const service = new InsightsBookingService({",
+                "416:         prisma,",
+                "417:         options: {",
+                "418:           scope: \"user\",",
+                "419:           userId: testData.user.id,",
+                "420:           orgId: testData.org.id,",
+                "421:         },",
+                "422:         filters: {",
+                "423:           eventTypeId: testData.eventType.id,",
+                "424:           memberUserId: testData.user.id,"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 415,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 385,
+            "context_end_line": 445,
+            "context": [
+                "385:         Prisma.sql`(\"eventTypeId\" = ${testData.eventType.id}) OR (\"eventParentId\" = ${testData.eventType.id})`",
+                "386:       );",
+                "387: ",
+                "388:       await testData.cleanup();",
+                "389:     });",
+                "390: ",
+                "391:     it(\"should build memberUserId filter conditions\", async () => {",
+                "392:       const testData = await createTestData();",
+                "393: ",
+                "394:       const service = new InsightsBookingService({",
+                "395:         prisma,",
+                "396:         options: {",
+                "397:           scope: \"user\",",
+                "398:           userId: testData.user.id,",
+                "399:           orgId: testData.org.id,",
+                "400:         },",
+                "401:         filters: {",
+                "402:           memberUserId: testData.user.id,",
+                "403:         },",
+                "404:       });",
+                "405: ",
+                "406:       const conditions = await service.getFilterConditions();",
+                "407:       expect(conditions).toEqual(Prisma.sql`\"userId\" = ${testData.user.id}`);",
+                "408: ",
+                "409:       await testData.cleanup();",
+                "410:     });",
+                "411: ",
+                "412:     it(\"should combine multiple filter conditions\", async () => {",
+                "413:       const testData = await createTestData();",
+                "414: ",
+                "415:       const service = new InsightsBookingService({",
+                "416:         prisma,",
+                "417:         options: {",
+                "418:           scope: \"user\",",
+                "419:           userId: testData.user.id,",
+                "420:           orgId: testData.org.id,",
+                "421:         },",
+                "422:         filters: {",
+                "423:           eventTypeId: testData.eventType.id,",
+                "424:           memberUserId: testData.user.id,",
+                "425:         },",
+                "426:       });",
+                "427: ",
+                "428:       const conditions = await service.getFilterConditions();",
+                "429:       expect(conditions).toEqual(",
+                "430:         Prisma.sql`((\"eventTypeId\" = ${testData.eventType.id}) OR (\"eventParentId\" = ${testData.eventType.id})) AND (\"userId\" = ${testData.user.id})`",
+                "431:       );",
+                "432: ",
+                "433:       await testData.cleanup();",
+                "434:     });",
+                "435:   });",
+                "436: ",
+                "437:   describe(\"getBaseConditions\", () => {",
+                "438:     it(\"should combine authorization and filter conditions\", async () => {",
+                "439:       const testData = await createTestData({",
+                "440:         teamRole: MembershipRole.OWNER,",
+                "441:         orgRole: MembershipRole.OWNER,",
+                "442:       });",
+                "443: ",
+                "444:       // Create a user-scoped event type (not team-scoped)",
+                "445:       const userEventType = await prisma.eventType.create({"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\__tests__\\insightsBooking.integration-test.ts",
+            "line_number": 468,
+            "matched_line": "      const service = new InsightsBookingService({",
+            "context_start_line": 438,
+            "context_end_line": 498,
+            "context": [
+                "438:     it(\"should combine authorization and filter conditions\", async () => {",
+                "439:       const testData = await createTestData({",
+                "440:         teamRole: MembershipRole.OWNER,",
+                "441:         orgRole: MembershipRole.OWNER,",
+                "442:       });",
+                "443: ",
+                "444:       // Create a user-scoped event type (not team-scoped)",
+                "445:       const userEventType = await prisma.eventType.create({",
+                "446:         data: {",
+                "447:           title: \"User Event Type\",",
+                "448:           slug: \"user-event-type\",",
+                "449:           length: 60,",
+                "450:           userId: testData.user.id,",
+                "451:           teamId: null, // User-scoped, not team-scoped",
+                "452:         },",
+                "453:       });",
+                "454: ",
+                "455:       // Create a booking for the user-scoped event type",
+                "456:       const userBooking = await prisma.booking.create({",
+                "457:         data: {",
+                "458:           uid: `user-booking-${Date.now()}-${Math.random().toString(36).substring(7)}`,",
+                "459:           title: \"User Booking\",",
+                "460:           startTime: new Date(),",
+                "461:           endTime: new Date(Date.now() + 60 * 60 * 1000),",
+                "462:           userId: testData.user.id,",
+                "463:           eventTypeId: userEventType.id,",
+                "464:           status: BookingStatus.PENDING,",
+                "465:         },",
+                "466:       });",
+                "467: ",
+                "468:       const service = new InsightsBookingService({",
+                "469:         prisma,",
+                "470:         options: {",
+                "471:           scope: \"user\",",
+                "472:           userId: testData.user.id,",
+                "473:           orgId: testData.org.id,",
+                "474:         },",
+                "475:         filters: {",
+                "476:           eventTypeId: userEventType.id,",
+                "477:         },",
+                "478:       });",
+                "479: ",
+                "480:       const baseConditions = await service.getBaseConditions();",
+                "481:       const results = await prisma.$queryRaw<{ id: number }[]>`",
+                "482:         SELECT id FROM \"BookingTimeStatusDenormalized\"",
+                "483:         WHERE ${baseConditions}",
+                "484:       `;",
+                "485: ",
+                "486:       // Should return the user booking since it matches both conditions",
+                "487:       expect(results).toEqual([",
+                "488:         {",
+                "489:           id: userBooking.id,",
+                "490:         },",
+                "491:       ]);",
+                "492: ",
+                "493:       // Clean up",
+                "494:       await prisma.booking.delete({",
+                "495:         where: { id: userBooking.id },",
+                "496:       });",
+                "497:       await prisma.eventType.delete({",
+                "498:         where: { id: userEventType.id },"
+            ]
+        }
+    ],
+    "total": 10,
+    "truncated": true,
+    "max_results": 10,
+    "message": "Results truncated at max_results; rerun with higher max_results or narrower include_patterns."
+}
+
+Message 6 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+让我看看生产代码中哪里调用了 `InsightsBookingService` 并传入 `filters`：
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "pattern": "InsightsBookingService",
+      "include_patterns": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "max_results": 20,
+      "exclude_patterns": [
+        "*__tests__*",
+        "*.test.*",
+        "*.spec.*",
+        "*node_modules*"
+      ]
+    },
+    "id": "call_00_5SZcVnCEhYhW4bN1j47b0699",
+    "type": "tool_call"
+  }
+]
+
+Message 7 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_5SZcVnCEhYhW4bN1j47b0699
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 29,
+            "matched_line": "export type InsightsBookingServicePublicOptions = {",
+            "context_start_line": 1,
+            "context_end_line": 59,
+            "context": [
+                "1: import { Prisma } from \"@prisma/client\";",
+                "2: import { z } from \"zod\";",
+                "3: ",
+                "4: import type { readonlyPrisma } from \"@calcom/prisma\";",
+                "5: import { MembershipRole } from \"@calcom/prisma/enums\";",
+                "6: ",
+                "7: import { MembershipRepository } from \"../repository/membership\";",
+                "8: import { TeamRepository } from \"../repository/team\";",
+                "9: ",
+                "10: export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+                "11:   z.object({",
+                "12:     scope: z.literal(\"user\"),",
+                "13:     userId: z.number(),",
+                "14:     orgId: z.number(),",
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 36,
+            "matched_line": "export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+            "context_start_line": 6,
+            "context_end_line": 66,
+            "context": [
+                "6: ",
+                "7: import { MembershipRepository } from \"../repository/membership\";",
+                "8: import { TeamRepository } from \"../repository/team\";",
+                "9: ",
+                "10: export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+                "11:   z.object({",
+                "12:     scope: z.literal(\"user\"),",
+                "13:     userId: z.number(),",
+                "14:     orgId: z.number(),",
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 38,
+            "matched_line": "export type InsightsBookingServiceFilterOptions = {",
+            "context_start_line": 8,
+            "context_end_line": 68,
+            "context": [
+                "8: import { TeamRepository } from \"../repository/team\";",
+                "9: ",
+                "10: export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+                "11:   z.object({",
+                "12:     scope: z.literal(\"user\"),",
+                "13:     userId: z.number(),",
+                "14:     orgId: z.number(),",
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 45,
+            "matched_line": "export class InsightsBookingService {",
+            "context_start_line": 15,
+            "context_end_line": 75,
+            "context": [
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 47,
+            "matched_line": "  private options: InsightsBookingServiceOptions | null;",
+            "context_start_line": 17,
+            "context_end_line": 77,
+            "context": [
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;",
+                "76:     } else if (filterConditions) {",
+                "77:       return filterConditions;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 48,
+            "matched_line": "  private filters?: InsightsBookingServiceFilterOptions;",
+            "context_start_line": 18,
+            "context_end_line": 78,
+            "context": [
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;",
+                "76:     } else if (filterConditions) {",
+                "77:       return filterConditions;",
+                "78:     } else {"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 58,
+            "matched_line": "    options: InsightsBookingServicePublicOptions;",
+            "context_start_line": 28,
+            "context_end_line": 88,
+            "context": [
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;",
+                "76:     } else if (filterConditions) {",
+                "77:       return filterConditions;",
+                "78:     } else {",
+                "79:       return NOTHING_CONDITION;",
+                "80:     }",
+                "81:   }",
+                "82: ",
+                "83:   async getAuthorizationConditions(): Promise<Prisma.Sql> {",
+                "84:     if (this.cachedAuthConditions === undefined) {",
+                "85:       this.cachedAuthConditions = await this.buildAuthorizationConditions();",
+                "86:     }",
+                "87:     return this.cachedAuthConditions;",
+                "88:   }"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 59,
+            "matched_line": "    filters?: InsightsBookingServiceFilterOptions;",
+            "context_start_line": 29,
+            "context_end_line": 89,
+            "context": [
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;",
+                "76:     } else if (filterConditions) {",
+                "77:       return filterConditions;",
+                "78:     } else {",
+                "79:       return NOTHING_CONDITION;",
+                "80:     }",
+                "81:   }",
+                "82: ",
+                "83:   async getAuthorizationConditions(): Promise<Prisma.Sql> {",
+                "84:     if (this.cachedAuthConditions === undefined) {",
+                "85:       this.cachedAuthConditions = await this.buildAuthorizationConditions();",
+                "86:     }",
+                "87:     return this.cachedAuthConditions;",
+                "88:   }",
+                "89: "
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 146,
+            "matched_line": "    options: Extract<InsightsBookingServiceOptions, { scope: \"org\" }>",
+            "context_start_line": 116,
+            "context_end_line": 176,
+            "context": [
+                "116:     }",
+                "117: ",
+                "118:     // Join all conditions with AND",
+                "119:     return conditions.reduce((acc, condition, index) => {",
+                "120:       if (index === 0) return condition;",
+                "121:       return Prisma.sql`(${acc}) AND (${condition})`;",
+                "122:     });",
+                "123:   }",
+                "124: ",
+                "125:   async buildAuthorizationConditions(): Promise<Prisma.Sql> {",
+                "126:     if (!this.options) {",
+                "127:       return NOTHING_CONDITION;",
+                "128:     }",
+                "129:     const isOwnerOrAdmin = await this.isOrgOwnerOrAdmin(this.options.userId, this.options.orgId);",
+                "130:     if (!isOwnerOrAdmin) {",
+                "131:       return NOTHING_CONDITION;",
+                "132:     }",
+                "133: ",
+                "134:     if (this.options.scope === \"user\") {",
+                "135:       return Prisma.sql`(\"userId\" = ${this.options.userId}) AND (\"teamId\" IS NULL)`;",
+                "136:     } else if (this.options.scope === \"org\") {",
+                "137:       return await this.buildOrgAuthorizationCondition(this.options);",
+                "138:     } else if (this.options.scope === \"team\") {",
+                "139:       return await this.buildTeamAuthorizationCondition(this.options);",
+                "140:     } else {",
+                "141:       return NOTHING_CONDITION;",
+                "142:     }",
+                "143:   }",
+                "144: ",
+                "145:   private async buildOrgAuthorizationCondition(",
+                "146:     options: Extract<InsightsBookingServiceOptions, { scope: \"org\" }>",
+                "147:   ): Promise<Prisma.Sql> {",
+                "148:     // Get all teams from the organization",
+                "149:     const teamRepo = new TeamRepository(this.prisma);",
+                "150:     const teamsFromOrg = await teamRepo.findAllByParentId({",
+                "151:       parentId: options.orgId,",
+                "152:       select: { id: true },",
+                "153:     });",
+                "154:     const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];",
+                "155: ",
+                "156:     // Get all users from the organization",
+                "157:     const userIdsFromOrg =",
+                "158:       teamsFromOrg.length > 0",
+                "159:         ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(",
+                "160:             (m) => m.userId",
+                "161:           )",
+                "162:         : [];",
+                "163: ",
+                "164:     const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];",
+                "165: ",
+                "166:     if (userIdsFromOrg.length > 0) {",
+                "167:       const uniqueUserIds = Array.from(new Set(userIdsFromOrg));",
+                "168:       conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);",
+                "169:     }",
+                "170: ",
+                "171:     return conditions.reduce((acc, condition, index) => {",
+                "172:       if (index === 0) return condition;",
+                "173:       return Prisma.sql`(${acc}) OR (${condition})`;",
+                "174:     });",
+                "175:   }",
+                "176: "
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 178,
+            "matched_line": "    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>",
+            "context_start_line": 148,
+            "context_end_line": 208,
+            "context": [
+                "148:     // Get all teams from the organization",
+                "149:     const teamRepo = new TeamRepository(this.prisma);",
+                "150:     const teamsFromOrg = await teamRepo.findAllByParentId({",
+                "151:       parentId: options.orgId,",
+                "152:       select: { id: true },",
+                "153:     });",
+                "154:     const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];",
+                "155: ",
+                "156:     // Get all users from the organization",
+                "157:     const userIdsFromOrg =",
+                "158:       teamsFromOrg.length > 0",
+                "159:         ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(",
+                "160:             (m) => m.userId",
+                "161:           )",
+                "162:         : [];",
+                "163: ",
+                "164:     const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];",
+                "165: ",
+                "166:     if (userIdsFromOrg.length > 0) {",
+                "167:       const uniqueUserIds = Array.from(new Set(userIdsFromOrg));",
+                "168:       conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);",
+                "169:     }",
+                "170: ",
+                "171:     return conditions.reduce((acc, condition, index) => {",
+                "172:       if (index === 0) return condition;",
+                "173:       return Prisma.sql`(${acc}) OR (${condition})`;",
+                "174:     });",
+                "175:   }",
+                "176: ",
+                "177:   private async buildTeamAuthorizationCondition(",
+                "178:     options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>",
+                "179:   ): Promise<Prisma.Sql> {",
+                "180:     const teamRepo = new TeamRepository(this.prisma);",
+                "181:     const childTeamOfOrg = await teamRepo.findByIdAndParentId({",
+                "182:       id: options.teamId,",
+                "183:       parentId: options.orgId,",
+                "184:       select: { id: true },",
+                "185:     });",
+                "186:     if (!childTeamOfOrg) {",
+                "187:       return NOTHING_CONDITION;",
+                "188:     }",
+                "189: ",
+                "190:     const usersFromTeam = await MembershipRepository.findAllByTeamIds({",
+                "191:       teamIds: [options.teamId],",
+                "192:       select: { userId: true },",
+                "193:     });",
+                "194:     const userIdsFromTeam = usersFromTeam.map((u) => u.userId);",
+                "195: ",
+                "196:     const conditions: Prisma.Sql[] = [",
+                "197:       Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,",
+                "198:     ];",
+                "199: ",
+                "200:     if (userIdsFromTeam.length > 0) {",
+                "201:       conditions.push(Prisma.sql`(\"userId\" = ANY(${userIdsFromTeam})) AND (\"isTeamBooking\" = false)`);",
+                "202:     }",
+                "203: ",
+                "204:     return conditions.reduce((acc, condition, index) => {",
+                "205:       if (index === 0) return condition;",
+                "206:       return Prisma.sql`(${acc}) OR (${condition})`;",
+                "207:     });",
+                "208:   }"
+            ]
+        }
+    ],
+    "total": 10,
+    "truncated": false
+}
+
+Message 8 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+让我搜索生产代码中哪里导入并使用了 `InsightsBookingService`：
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "include_patterns": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "max_results": 20,
+      "exclude_patterns": [
+        "*__tests__*",
+        "*.test.*",
+        "*.spec.*",
+        "*node_modules*"
+      ],
+      "pattern": "from.*insightsBooking"
+    },
+    "id": "call_00_KlcduxXdeBvjO0Vg3Pv71967",
+    "type": "tool_call"
+  }
+]
+
+Message 9 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_KlcduxXdeBvjO0Vg3Pv71967
+Result:
+{
+    "matches": [],
+    "message": "No matches found for pattern: from.*insightsBooking"
+}
+
+Message 10 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "run_grep",
+    "args": {
+      "include_patterns": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "max_results": 20,
+      "exclude_patterns": [
+        "*__tests__*",
+        "*.test.*",
+        "*.spec.*",
+        "*node_modules*"
+      ],
+      "pattern": "insightsBooking"
+    },
+    "id": "call_00_bLJNWW516a0pw7erNKBD3169",
+    "type": "tool_call"
+  }
+]
+
+Message 11 [Tool]:
+--------------------------------------------------------------------------------
+Tool: run_grep
+Tool Call ID: call_00_bLJNWW516a0pw7erNKBD3169
+Result:
+{
+    "matches": [
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 10,
+            "matched_line": "export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+            "context_start_line": 1,
+            "context_end_line": 40,
+            "context": [
+                "1: import { Prisma } from \"@prisma/client\";",
+                "2: import { z } from \"zod\";",
+                "3: ",
+                "4: import type { readonlyPrisma } from \"@calcom/prisma\";",
+                "5: import { MembershipRole } from \"@calcom/prisma/enums\";",
+                "6: ",
+                "7: import { MembershipRepository } from \"../repository/membership\";",
+                "8: import { TeamRepository } from \"../repository/team\";",
+                "9: ",
+                "10: export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+                "11:   z.object({",
+                "12:     scope: z.literal(\"user\"),",
+                "13:     userId: z.number(),",
+                "14:     orgId: z.number(),",
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 36,
+            "matched_line": "export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+            "context_start_line": 6,
+            "context_end_line": 66,
+            "context": [
+                "6: ",
+                "7: import { MembershipRepository } from \"../repository/membership\";",
+                "8: import { TeamRepository } from \"../repository/team\";",
+                "9: ",
+                "10: export const insightsBookingServiceOptionsSchema = z.discriminatedUnion(\"scope\", [",
+                "11:   z.object({",
+                "12:     scope: z.literal(\"user\"),",
+                "13:     userId: z.number(),",
+                "14:     orgId: z.number(),",
+                "15:   }),",
+                "16:   z.object({",
+                "17:     scope: z.literal(\"org\"),",
+                "18:     userId: z.number(),",
+                "19:     orgId: z.number(),",
+                "20:   }),",
+                "21:   z.object({",
+                "22:     scope: z.literal(\"team\"),",
+                "23:     userId: z.number(),",
+                "24:     orgId: z.number(),",
+                "25:     teamId: z.number(),",
+                "26:   }),",
+                "27: ]);",
+                "28: ",
+                "29: export type InsightsBookingServicePublicOptions = {",
+                "30:   scope: \"user\" | \"org\" | \"team\";",
+                "31:   userId: number;",
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }"
+            ]
+        },
+        {
+            "file": "packages\\lib\\server\\service\\insightsBooking.ts",
+            "line_number": 62,
+            "matched_line": "    const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+            "context_start_line": 32,
+            "context_end_line": 92,
+            "context": [
+                "32:   orgId: number;",
+                "33:   teamId?: number;",
+                "34: };",
+                "35: ",
+                "36: export type InsightsBookingServiceOptions = z.infer<typeof insightsBookingServiceOptionsSchema>;",
+                "37: ",
+                "38: export type InsightsBookingServiceFilterOptions = {",
+                "39:   eventTypeId?: number;",
+                "40:   memberUserId?: number;",
+                "41: };",
+                "42: ",
+                "43: const NOTHING_CONDITION = Prisma.sql`1=0`;",
+                "44: ",
+                "45: export class InsightsBookingService {",
+                "46:   private prisma: typeof readonlyPrisma;",
+                "47:   private options: InsightsBookingServiceOptions | null;",
+                "48:   private filters?: InsightsBookingServiceFilterOptions;",
+                "49:   private cachedAuthConditions?: Prisma.Sql;",
+                "50:   private cachedFilterConditions?: Prisma.Sql | null;",
+                "51: ",
+                "52:   constructor({",
+                "53:     prisma,",
+                "54:     options,",
+                "55:     filters,",
+                "56:   }: {",
+                "57:     prisma: typeof readonlyPrisma;",
+                "58:     options: InsightsBookingServicePublicOptions;",
+                "59:     filters?: InsightsBookingServiceFilterOptions;",
+                "60:   }) {",
+                "61:     this.prisma = prisma;",
+                "62:     const validation = insightsBookingServiceOptionsSchema.safeParse(options);",
+                "63:     this.options = validation.success ? validation.data : null;",
+                "64: ",
+                "65:     this.filters = filters;",
+                "66:   }",
+                "67: ",
+                "68:   async getBaseConditions(): Promise<Prisma.Sql> {",
+                "69:     const authConditions = await this.getAuthorizationConditions();",
+                "70:     const filterConditions = await this.getFilterConditions();",
+                "71: ",
+                "72:     if (authConditions && filterConditions) {",
+                "73:       return Prisma.sql`(${authConditions}) AND (${filterConditions})`;",
+                "74:     } else if (authConditions) {",
+                "75:       return authConditions;",
+                "76:     } else if (filterConditions) {",
+                "77:       return filterConditions;",
+                "78:     } else {",
+                "79:       return NOTHING_CONDITION;",
+                "80:     }",
+                "81:   }",
+                "82: ",
+                "83:   async getAuthorizationConditions(): Promise<Prisma.Sql> {",
+                "84:     if (this.cachedAuthConditions === undefined) {",
+                "85:       this.cachedAuthConditions = await this.buildAuthorizationConditions();",
+                "86:     }",
+                "87:     return this.cachedAuthConditions;",
+                "88:   }",
+                "89: ",
+                "90:   async getFilterConditions(): Promise<Prisma.Sql | null> {",
+                "91:     if (this.cachedFilterConditions === undefined) {",
+                "92:       this.cachedFilterConditions = await this.buildFilterConditions();"
+            ]
+        }
+    ],
+    "total": 3,
+    "truncated": false
+}
+
+Message 12 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+看起来这个文件目前只在测试文件中被引用，生产代码中还没有调用方。不过，让我确认一下 Prisma.sql 的行为——这是关键点。
+
+根据 Prisma 官方文档，`Prisma.sql` 是一个模板标签函数，它使用参数化查询。当你在 `${...}` 中传入值时，Prisma 会将其转换为参数占位符（如 `$1`, `$2`），而不是直接拼接字符串。这意味着即使传入恶意字符串，也不会导致 SQL 注入。
+
+让我验证一下 `Prisma.sql` 的签名来确认：
+Tool Calls:
+[
+  {
+    "name": "cpg_symbol_search",
+    "args": {
+      "query": "Prisma.sql",
+      "lang": "typescript"
+    },
+    "id": "call_00_Swn2udA0aX7Y6I8hzpnn1991",
+    "type": "tool_call"
+  }
+]
+
+Message 13 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_symbol_search
+Tool Call ID: call_00_Swn2udA0aX7Y6I8hzpnn1991
+Result:
+{
+    "rev": "head",
+    "query": "Prisma.sql",
+    "symbols": [],
+    "callsites": [],
+    "_budget": {
+        "attrs_dropped": true,
+        "symbols_total": 0,
+        "symbols_returned": 0,
+        "symbols_truncated": false,
+        "callsites_total": 0,
+        "callsites_returned": 0,
+        "callsites_truncated": false
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 245,
+        "approx_bytes_utf8": 245,
+        "keys": [
+            "_budget",
+            "callsites",
+            "error",
+            "query",
+            "rev",
+            "symbols"
+        ]
+    },
+    "_hint": "No matches in current Lite-CPG DB (often diff/scoped). Call cpg_ast_index() to see indexed files; if the target file isn't indexed, fall back to run_grep with narrow include_patterns (e.g., a specific file path)."
+}
+
+Message 14 [Assistant]:
+--------------------------------------------------------------------------------
+Tool Calls:
+[
+  {
+    "name": "cpg_ast_index",
+    "args": {
+      "file_paths": [
+        "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\insightsBooking.ts"
+      ]
+    },
+    "id": "call_00_r94gVV6s1rcjEOEqHJ1k3881",
+    "type": "tool_call"
+  }
+]
+
+Message 15 [Tool]:
+--------------------------------------------------------------------------------
+Tool: cpg_ast_index
+Tool Call ID: call_00_r94gVV6s1rcjEOEqHJ1k3881
+Result:
+{
+    "rev": "head",
+    "files": [
+        {
+            "path": "D:\\Desktop\\projects\\CodeReview\\dataset\\cal.com-greptile\\packages\\lib\\server\\service\\insightsBooking.ts",
+            "lang": "typescript",
+            "defs_total": 6,
+            "defs": [
+                {
+                    "name": "insightsBookingServiceOptionsSchema",
+                    "kind": "function",
+                    "start_line": 10,
+                    "end_line": 27
+                },
+                {
+                    "name": "NOTHING_CONDITION",
+                    "kind": "function",
+                    "start_line": 43,
+                    "end_line": 43
+                },
+                {
+                    "name": "InsightsBookingService",
+                    "kind": "type",
+                    "start_line": 45,
+                    "end_line": 220
+                },
+                {
+                    "name": "if",
+                    "kind": "function",
+                    "start_line": 84,
+                    "end_line": 86
+                },
+                {
+                    "name": "if",
+                    "kind": "function",
+                    "start_line": 91,
+                    "end_line": 93
+                },
+                {
+                    "name": "if",
+                    "kind": "function",
+                    "start_line": 126,
+                    "end_line": 128
+                }
+            ],
+            "calls_total": 49,
+            "calls": [
+                {
+                    "dst_name": "z.discriminatedUnion",
+                    "resolved": false,
+                    "line": 10
+                },
+                {
+                    "dst_name": "z.object",
+                    "resolved": false,
+                    "line": 11
+                },
+                {
+                    "dst_name": "z.literal",
+                    "resolved": false,
+                    "line": 12
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 13
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 14
+                },
+                {
+                    "dst_name": "z.object",
+                    "resolved": false,
+                    "line": 16
+                },
+                {
+                    "dst_name": "z.literal",
+                    "resolved": false,
+                    "line": 17
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 18
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 19
+                },
+                {
+                    "dst_name": "z.object",
+                    "resolved": false,
+                    "line": 21
+                },
+                {
+                    "dst_name": "z.literal",
+                    "resolved": false,
+                    "line": 22
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 23
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 24
+                },
+                {
+                    "dst_name": "z.number",
+                    "resolved": false,
+                    "line": 25
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 43
+                },
+                {
+                    "dst_name": "{\r\n    prisma: typeof readonlyPrisma;\r\n    options: InsightsBookingServicePublicOptions;\r\n    filters?: InsightsBookingServiceFilterOptions;\r\n  }) {\r\n    this.prisma = prisma;\r\n    const validation = insightsBookingServiceOptionsSchema.safeParse(options);\r\n    this.options = validation.success ? validation.data : null;\r\n\r\n    this.filters = filters;\r\n  }\r\n\r\n  async getBaseConditions(): Promise<Prisma.Sql> {\r\n    const authConditions = await this.getAuthorizationConditions();\r\n    const filterConditions = await this.getFilterConditions();\r\n\r\n    if (authConditions && filterConditions) {\r\n      return Prisma.sql`(${authConditions}) AND (${filterConditions})`;\r\n    } else if (authConditions) {\r\n      return authConditions;\r\n    } else if (filterConditions) {\r\n      return filterConditions;\r\n    } else {\r\n      return NOTHING_CONDITION;\r\n    }\r\n  }\r\n\r\n  async getAuthorizationConditions(): Promise<Prisma.Sql> {\r\n    if (this.cachedAuthConditions === undefined) {\r\n      this.cachedAuthConditions = await this.buildAuthorizationConditions();\r\n    }\r\n    return this.cachedAuthConditions;\r\n  }\r\n\r\n  async getFilterConditions(): Promise<Prisma.Sql | null> {\r\n    if (this.cachedFilterConditions === undefined) {\r\n      this.cachedFilterConditions = await this.buildFilterConditions();\r\n    }\r\n    return this.cachedFilterConditions;\r\n  }\r\n\r\n  async buildFilterConditions(): Promise<Prisma.Sql | null> {\r\n    const conditions: Prisma.Sql[] = [];\r\n\r\n    if (!this.filters) {\r\n      return null;\r\n    }\r\n\r\n    if (this.filters.eventTypeId) {\r\n      conditions.push(\r\n        Prisma.sql`(\"eventTypeId\" = ${this.filters.eventTypeId}) OR (\"eventParentId\" = ${this.filters.eventTypeId})`\r\n      );\r\n    }\r\n\r\n    if (this.filters.memberUserId) {\r\n      conditions.push(Prisma.sql`\"userId\" = ${this.filters.memberUserId}`);\r\n    }\r\n\r\n    if (conditions.length === 0) {\r\n      return null;\r\n    }\r\n\r\n    // Join all conditions with AND\r\n    return conditions.reduce",
+                    "resolved": false,
+                    "line": 56
+                },
+                {
+                    "dst_name": "insightsBookingServiceOptionsSchema.safeParse",
+                    "resolved": false,
+                    "line": 62
+                },
+                {
+                    "dst_name": "async",
+                    "resolved": false,
+                    "line": 68
+                },
+                {
+                    "dst_name": "this.getAuthorizationConditions",
+                    "resolved": false,
+                    "line": 69
+                },
+                {
+                    "dst_name": "this.getFilterConditions",
+                    "resolved": false,
+                    "line": 70
+                },
+                {
+                    "dst_name": "this.buildAuthorizationConditions",
+                    "resolved": false,
+                    "line": 85
+                },
+                {
+                    "dst_name": "this.buildFilterConditions",
+                    "resolved": false,
+                    "line": 92
+                },
+                {
+                    "dst_name": "{\r\n    const conditions: Prisma.Sql[] = [];\r\n\r\n    if (!this.filters) {\r\n      return null;\r\n    }\r\n\r\n    if (this.filters.eventTypeId) {\r\n      conditions.push(\r\n        Prisma.sql`(\"eventTypeId\" = ${this.filters.eventTypeId}) OR (\"eventParentId\" = ${this.filters.eventTypeId})`\r\n      );\r\n    }\r\n\r\n    if (this.filters.memberUserId) {\r\n      conditions.push",
+                    "resolved": false,
+                    "line": 97
+                },
+                {
+                    "dst_name": "conditions.push",
+                    "resolved": false,
+                    "line": 105
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 106
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 111
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 121
+                },
+                {
+                    "dst_name": "this.isOrgOwnerOrAdmin",
+                    "resolved": false,
+                    "line": 129
+                },
+                {
+                    "dst_name": "this.buildOrgAuthorizationCondition",
+                    "resolved": false,
+                    "line": 137
+                },
+                {
+                    "dst_name": "this.buildTeamAuthorizationCondition",
+                    "resolved": false,
+                    "line": 139
+                },
+                {
+                    "dst_name": "{ scope: \"org\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    // Get all teams from the organization\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const teamsFromOrg = await teamRepo.findAllByParentId({\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\r\n\r\n    // Get all users from the organization\r\n    const userIdsFromOrg =\r\n      teamsFromOrg.length > 0\r\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\r\n            (m) => m.userId\r\n          )\r\n        : [];\r\n\r\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\r\n\r\n    if (userIdsFromOrg.length > 0) {\r\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce((acc, condition, index) => {\r\n      if (index === 0) return condition;\r\n      return Prisma.sql`(${acc}) OR (${condition})`;\r\n    });\r\n  }\r\n\r\n  private async buildTeamAuthorizationCondition(\r\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId({\r\n      id: options.teamId,\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    if (!childTeamOfOrg) {\r\n      return NOTHING_CONDITION;\r\n    }\r\n\r\n    const usersFromTeam = await MembershipRepository.findAllByTeamIds({\r\n      teamIds: [options.teamId],\r\n      select: { userId: true },\r\n    });\r\n    const userIdsFromTeam = usersFromTeam.map((u) => u.userId);\r\n\r\n    const conditions: Prisma.Sql[] = [\r\n      Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,\r\n    ];\r\n\r\n    if (userIdsFromTeam.length > 0) {\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${userIdsFromTeam})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce",
+                    "resolved": false,
+                    "line": 146
+                },
+                {
+                    "dst_name": "{ scope: \"org\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    // Get all teams from the organization\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const teamsFromOrg = await teamRepo.findAllByParentId({\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\r\n\r\n    // Get all users from the organization\r\n    const userIdsFromOrg =\r\n      teamsFromOrg.length > 0\r\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\r\n            (m) => m.userId\r\n          )\r\n        : [];\r\n\r\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\r\n\r\n    if (userIdsFromOrg.length > 0) {\r\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce((acc, condition, index) => {\r\n      if (index === 0) return condition;\r\n      return Prisma.sql`(${acc}) OR (${condition})`;\r\n    });\r\n  }\r\n\r\n  private async buildTeamAuthorizationCondition(\r\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId({\r\n      id: options.teamId,\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    if (!childTeamOfOrg) {\r\n      return NOTHING_CONDITION;\r\n    }\r\n\r\n    const usersFromTeam = await MembershipRepository.findAllByTeamIds({\r\n      teamIds: [options.teamId],\r\n      select: { userId: true },\r\n    });\r\n    const userIdsFromTeam = usersFromTeam.map((u) => u.userId);\r\n\r\n    const conditions: Prisma.Sql[] = [\r\n      Prisma.sql`(\"teamId\" = ${options.teamId}) AND (\"isTeamBooking\" = true)`,\r\n    ];\r\n\r\n    if (userIdsFromTeam.length > 0) {\r\n      conditions.push",
+                    "resolved": false,
+                    "line": 146
+                },
+                {
+                    "dst_name": "{ scope: \"org\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    // Get all teams from the organization\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const teamsFromOrg = await teamRepo.findAllByParentId({\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\r\n\r\n    // Get all users from the organization\r\n    const userIdsFromOrg =\r\n      teamsFromOrg.length > 0\r\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\r\n            (m) => m.userId\r\n          )\r\n        : [];\r\n\r\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\r\n\r\n    if (userIdsFromOrg.length > 0) {\r\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce((acc, condition, index) => {\r\n      if (index === 0) return condition;\r\n      return Prisma.sql`(${acc}) OR (${condition})`;\r\n    });\r\n  }\r\n\r\n  private async buildTeamAuthorizationCondition(\r\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId({\r\n      id: options.teamId,\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    if (!childTeamOfOrg) {\r\n      return NOTHING_CONDITION;\r\n    }\r\n\r\n    const usersFromTeam = await MembershipRepository.findAllByTeamIds({\r\n      teamIds: [options.teamId],\r\n      select: { userId: true },\r\n    });\r\n    const userIdsFromTeam = usersFromTeam.map",
+                    "resolved": false,
+                    "line": 146
+                },
+                {
+                    "dst_name": "{ scope: \"org\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    // Get all teams from the organization\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const teamsFromOrg = await teamRepo.findAllByParentId({\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\r\n\r\n    // Get all users from the organization\r\n    const userIdsFromOrg =\r\n      teamsFromOrg.length > 0\r\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\r\n            (m) => m.userId\r\n          )\r\n        : [];\r\n\r\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\r\n\r\n    if (userIdsFromOrg.length > 0) {\r\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce((acc, condition, index) => {\r\n      if (index === 0) return condition;\r\n      return Prisma.sql`(${acc}) OR (${condition})`;\r\n    });\r\n  }\r\n\r\n  private async buildTeamAuthorizationCondition(\r\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId({\r\n      id: options.teamId,\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    if (!childTeamOfOrg) {\r\n      return NOTHING_CONDITION;\r\n    }\r\n\r\n    const usersFromTeam = await MembershipRepository.findAllByTeamIds",
+                    "resolved": false,
+                    "line": 146
+                },
+                {
+                    "dst_name": "{ scope: \"org\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    // Get all teams from the organization\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const teamsFromOrg = await teamRepo.findAllByParentId({\r\n      parentId: options.orgId,\r\n      select: { id: true },\r\n    });\r\n    const teamIds = [options.orgId, ...teamsFromOrg.map((t) => t.id)];\r\n\r\n    // Get all users from the organization\r\n    const userIdsFromOrg =\r\n      teamsFromOrg.length > 0\r\n        ? (await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map(\r\n            (m) => m.userId\r\n          )\r\n        : [];\r\n\r\n    const conditions: Prisma.Sql[] = [Prisma.sql`(\"teamId\" = ANY(${teamIds})) AND (\"isTeamBooking\" = true)`];\r\n\r\n    if (userIdsFromOrg.length > 0) {\r\n      const uniqueUserIds = Array.from(new Set(userIdsFromOrg));\r\n      conditions.push(Prisma.sql`(\"userId\" = ANY(${uniqueUserIds})) AND (\"isTeamBooking\" = false)`);\r\n    }\r\n\r\n    return conditions.reduce((acc, condition, index) => {\r\n      if (index === 0) return condition;\r\n      return Prisma.sql`(${acc}) OR (${condition})`;\r\n    });\r\n  }\r\n\r\n  private async buildTeamAuthorizationCondition(\r\n    options: Extract<InsightsBookingServiceOptions, { scope: \"team\" }>\r\n  ): Promise<Prisma.Sql> {\r\n    const teamRepo = new TeamRepository(this.prisma);\r\n    const childTeamOfOrg = await teamRepo.findByIdAndParentId",
+                    "resolved": false,
+                    "line": 146
+                },
+                {
+                    "dst_name": "teamRepo.findAllByParentId",
+                    "resolved": false,
+                    "line": 150
+                },
+                {
+                    "dst_name": "teamsFromOrg.map",
+                    "resolved": false,
+                    "line": 154
+                },
+                {
+                    "dst_name": "(await MembershipRepository.findAllByTeamIds({ teamIds, select: { userId: true } })).map",
+                    "resolved": false,
+                    "line": 159
+                },
+                {
+                    "dst_name": "MembershipRepository.findAllByTeamIds",
+                    "resolved": false,
+                    "line": 159
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 164
+                },
+                {
+                    "dst_name": "Array.from",
+                    "resolved": false,
+                    "line": 167
+                },
+                {
+                    "dst_name": "conditions.push",
+                    "resolved": false,
+                    "line": 168
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 168
+                },
+                {
+                    "dst_name": "conditions.reduce",
+                    "resolved": false,
+                    "line": 171
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 173
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 197
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 201
+                },
+                {
+                    "dst_name": "Prisma.sql",
+                    "resolved": false,
+                    "line": 206
+                },
+                {
+                    "dst_name": "MembershipRepository.findUniqueByUserIdAndTeamId",
+                    "resolved": false,
+                    "line": 212
+                }
+            ],
+            "imports_total": 6,
+            "imports": [
+                {
+                    "import_text": "import { Prisma } from \"@prisma/client\";",
+                    "line": 1
+                },
+                {
+                    "import_text": "import { z } from \"zod\";",
+                    "line": 2
+                },
+                {
+                    "import_text": "import type { readonlyPrisma } from \"@calcom/prisma\";",
+                    "line": 4
+                },
+                {
+                    "import_text": "import { MembershipRole } from \"@calcom/prisma/enums\";",
+                    "line": 5
+                },
+                {
+                    "import_text": "import { MembershipRepository } from \"../repository/membership\";",
+                    "line": 7
+                },
+                {
+                    "import_text": "import { TeamRepository } from \"../repository/team\";",
+                    "line": 8
+                }
+            ]
+        }
+    ],
+    "_budget": {
+        "attrs_dropped": true,
+        "summary_only": false,
+        "files_total": 1,
+        "files_returned": 1,
+        "files_truncated": false,
+        "compact": true
+    },
+    "error": null,
+    "_payload": {
+        "approx_chars": 15995,
+        "approx_bytes_utf8": 15995,
+        "keys": [
+            "_budget",
+            "error",
+            "files",
+            "rev"
+        ]
+    }
+}
+
+Message 16 [Assistant]:
+--------------------------------------------------------------------------------
+Content:
+好的，我已经有了足够的信息来进行分析。让我总结一下关键发现：
+
+## 4. 找反证/保护
+
+**关键反证（保护机制）**：
+
+1. **`Prisma.sql` 是参数化模板标签**：`Prisma.sql` 是 Prisma 提供的模板标签函数，它使用参数化查询（prepared statements）。当你在 `${...}` 中传入值时，Prisma 会将其转换为参数占位符（如 `$1`, `$2`），而不是直接拼接字符串。这意味着即使 `this.filters.eventTypeId` 或 `this.filters.memberUserId` 包含恶意内容，也不会导致 SQL 注入。
+
+2. **类型约束**：`InsightsBookingServiceFilterOptions` 类型定义（第38-41行）中 `eventTypeId` 和 `memberUserId` 均为 `number` 类型。虽然 TypeScript 类型在运行时不会强制校验，但结合 `Prisma.sql` 的参数化特性，注入风险极低。
+
+3. **鉴权保护**：`buildFilterConditions` 返回的条件会与 `buildAuthorizationConditions` 的结果通过 `AND` 组合（第72-73行），而 `buildAuthorizationConditions` 会检查用户是否为组织 Owner/Admin（第129行），确保只有授权用户才能访问数据。
+
+**结论**：`Prisma.sql` 使用参数化查询，${...} 插值是安全的，不会导致 SQL 注入。这是一个**误报**。
+
+```json
+{
+  "risk_type": "Authorization_Data_Exposure",
+  "file_path": "packages/lib/server/service/insightsBooking.ts",
+  "line_number": [97, 123],
+  "description": "误报：buildFilterConditions 方法中 this.filters.eventTypeId 和 this.filters.memberUserId 被传入 Prisma.sql 模板。Prisma.sql 是参数化模板标签，${...} 插值会被转换为参数占位符（如 $1, $2），而非直接拼接字符串，因此不存在 SQL 注入风险。此外，filters 的类型定义为 number（第38-41行），且最终查询条件会与鉴权条件（buildAuthorizationConditions，第125-143行）通过 AND 组合，确保只有组织 Owner/Admin 才能访问数据。",
+  "confidence": 0.3,
+  "severity": "info",
+  "suggestion": "无需修复。Prisma.sql 使用参数化查询，${...} 插值是安全的。"
+}
+```
+
+

@@ -1,0 +1,20 @@
+### 3. 鉴权与数据暴露风险 (Authorization & Data Exposure)
+**Risk Type**: `Authorization_Data_Exposure`
+
+**定义**：代码逻辑允许未授权访问、导致数据泄露或存在被注入的风险。
+
+**检测视角**：污点分析（注入类）与语义对齐（权限类）。
+
+**重点关注的危险模式**：
+1. 注入攻击 (Injection Risks)
+   - 模式：将变量直接拼接到 SQL、Shell 命令、HTML 或正则表达式中。
+   - 关键词：Prisma.sql, exec(, eval(, innerHTML, dangerouslySetInnerHTML, system(, open(|
+2. 服务端请求伪造 (SSRF)
+   - 模式：对用户可控的 URL 发起网络请求。
+   - 关键词：fetch(url), axios.get(url), open(url), http.Get
+3. 权限与访问控制失效 (Broken Access Control)
+   - 模式：自定义权限校验逻辑、逻辑运算符混淆、不安全的直接对象引用 (IDOR)。
+   - 关键词：if (user.id === input.id), canManage, hasPermission
+4. 侧信道与加密误用 (Crypto & Timing Attacks)
+   - 模式：使用 == 比较敏感数据、在日志中打印敏感字段。
+   - 关键词：secret, token, password, key, hash, signature

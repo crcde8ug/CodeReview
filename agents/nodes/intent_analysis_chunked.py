@@ -29,6 +29,7 @@ from agents.prompts import render_prompt_template
 from core.state import FileAnalysis, ReviewState
 from util.diff_utils import extract_file_diff, parse_diff_with_line_numbers
 from util.json_utils import extract_json_from_text
+from util.pattern_detector import detect_patterns_from_diff, load_pattern_text
 from util.runtime_utils import elapsed_seconds, elapsed_tag
 
 logger = logging.getLogger(__name__)
@@ -403,6 +404,15 @@ async def intent_analysis_chunked_node(state: ReviewState) -> Dict[str, Any]:
     semaphore = asyncio.Semaphore(max_concurrent)
     parser = PydanticOutputParser(pydantic_object=ChunkedIntentResponse)
 
+    # Pre-load pattern texts for detected patterns (based on full diff).
+    detected_patterns = detect_patterns_from_diff(diff_context)
+    pattern_sections = []
+    for pname in detected_patterns:
+        ptext = load_pattern_text(pname)
+        if ptext:
+            pattern_sections.append(ptext)
+    patterns_text_block = "\n\n".join(pattern_sections) if pattern_sections else ""
+
     async def analyze_chunk(chunk: Chunk) -> List[FileAnalysis]:
         async with semaphore:
             meta_now = state.get("metadata") or {}
@@ -417,6 +427,9 @@ async def intent_analysis_chunked_node(state: ReviewState) -> Dict[str, Any]:
                 files_list=files_list,
                 chunk_diff=chunk.chunk_diff,
             )
+            # Append dynamically loaded pattern definitions.
+            if patterns_text_block:
+                prompt += "\n## 危险模式（根据 diff 内容动态加载）\n\n" + patterns_text_block
             messages = [
                 SystemMessage(content="You are an expert code reviewer analyzing PR diffs."),
                 HumanMessage(content=prompt + "\n\n" + parser.get_format_instructions()),

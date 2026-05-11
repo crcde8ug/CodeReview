@@ -1,0 +1,24 @@
+### 2. 并发与时序正确性 (Concurrency & Timing Correctness)
+**Risk Type**: `Concurrency_Timing_Correctness`
+
+**定义**：涉及多线程、异步回调或执行顺序依赖的问题。代码在单元测试中可能通过，但在高并发或特定时序下失效。
+
+**检测视角**：控制流分析与作用域分析。需要识别"跨过程"的副作用。
+
+**重点关注的危险模式**：
+1. 断裂的异步流 (Broken Async Control)
+   - 模式：arr.forEach(async ...) 或 arr.map(async ...) 后未接 Promise.all。
+   - 风险：循环内的异步操作会立即返回，主线程不会等待。
+   - 关键词：forEach, map, async, Promise
+2. 遗漏的等待 (Floating Promises)
+   - 模式：调用了异步函数但未加 await 或 return。
+   - 风险：函数在后台默默执行，无法捕获异常。
+   - 关键词：fetch, save, delete, update
+3. 竞态条件 (Check-Then-Act)
+   - 模式：if (check(resource)) {{ modify(resource); }}
+   - 风险：两个线程可能同时通过 Check，导致资源超卖。
+   - 关键词：count, exists, limit, create, update
+4. 锁机制失效 (Broken Locking)
+   - 模式：双重检查锁失效、锁范围过窄、非原子性操作。
+5. 隐式并发上下文 (Implicit Concurrency Context)
+   - 模式：代码本身是单线程的，但位于 Web Controller、RPC Handler 或全局中间件中。

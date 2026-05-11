@@ -1,0 +1,23 @@
+### 1. 健壮性与边界条件 (Robustness & Boundary Conditions)
+**Risk Type**: `Robustness_Boundary_Conditions`
+
+**定义**：代码假设了"理想数据流"，未处理数据缺失（Null/Undefined）、空集合或非法格式，导致运行时崩溃或逻辑穿透。
+
+**检测视角**：数据流分析中，变量在到达"使用点（Sink）"前未经过"检查点（Sanitizer）"。
+
+**重点关注的危险模式**：
+1. 裸露的链式调用
+   - 模式：obj.prop 或 obj.method()
+   - 风险：obj 来源于数据库查询、API 请求或字典查找，且未做判空。
+   - 关键词：.find_by, .get(), request.GET[], json.loads
+2. 不安全的解构/索引
+   - 模式：const [a] = arr 或 list[0]
+   - 风险：数组可能为空，导致取出的元素为 undefined 或抛出 IndexOutOfBound。
+   - 特例：const [a] = arr ?? [] 仅保护了 arr 不为 null，未保护 a 不为 undefined。
+3. 危险的默认值/类型混淆
+   - 模式：if (val) 或 val || default
+   - 风险：当 val 为 0, false, "" 时被误判为 False。
+4. 框架/ORM 边界违规
+   - 模式：对 ORM 查询结果使用负数切片 query[-1:]。
+5. 复制粘贴导致的校验遗漏
+   - 模式：校验了 varA 但报错信息或后续逻辑使用了 varB。

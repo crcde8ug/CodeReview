@@ -19,7 +19,7 @@ def _get_log_directory(
 ) -> Path:
     """获取当前运行的日志目录路径。
     
-    返回目录结构: log/repo_name/model_name/{base}_2_{head}_{timestamp}/
+    返回目录结构: log/{date}/repo_name/model_name/{base}_2_{head}_{timestamp}/
     
     Args:
         workspace_root: 工作区根目录。
@@ -59,8 +59,9 @@ def _get_log_directory(
     if not timestamp:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Create log directory structure: log/repo_name/model_name/{base}_2_{head}_{timestamp}/
-    log_dir = Path("log") / repo_name / model_name / f"{base_sanitized}_2_{head_sanitized}_{timestamp}"
+    # Create log directory structure: log/{date}/repo_name/model_name/{base}_2_{head}_{timestamp}/
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    log_dir = Path("log") / date_str / repo_name / model_name / f"{base_sanitized}_2_{head_sanitized}_{timestamp}"
     log_dir.mkdir(parents=True, exist_ok=True)
     
     return log_dir

@@ -2,6 +2,9 @@
 
 实现 Map-Reduce 模式，并行分析变更文件的意图。
 使用 LCEL 语法：prompt | llm | parser。
+
+Progressive Context: 动态组装 prompt（核心指令 + 按需加载的模式库），
+根据 diff 中出现的关键词动态注入相关模式定义，避免无关信息干扰。
 """
 
 import asyncio
@@ -9,7 +12,7 @@ import logging
 import json
 import re
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseChatModel
@@ -19,8 +22,63 @@ from util.diff_utils import generate_context_text_for_file, extract_file_diff
 from util.file_utils import read_file_content
 from util.json_utils import extract_json_from_text
 from util.runtime_utils import elapsed_tag
+from util.pattern_detector import detect_patterns_from_diff, load_pattern_text
 
 logger = logging.getLogger(__name__)
+
+
+def _should_use_progressive_context(config) -> bool:
+    """从配置读取是否启用动态 prompt 组装，默认启用。"""
+    try:
+        return bool(getattr(getattr(config, "system", None), "harness_progressive_context_enabled", True))
+    except Exception:
+        return True
+
+
+def _assemble_intent_prompt(
+    file_path: str,
+    file_diff: str,
+    file_content: str,
+) -> str:
+    """动态组装 intent analysis prompt：核心指令 + 按需加载的模式库。
+
+    根据 diff 中出现的关键词检测相关模式，只注入对应的模式定义。
+    如果未检测到任何模式，默认注入所有模式（保守策略）。
+    """
+    # 加载核心指令
+    core_template = render_prompt_template(
+        "intent_core",
+        file_path=file_path,
+        file_diff=file_diff,
+        file_content=file_content,
+    )
+
+    # 检测相关模式
+    detected_patterns = detect_patterns_from_diff(file_diff)
+
+    # 组装：核心 + 各模式定义
+    parts = [core_template, "\n## 危险模式（根据 diff 内容动态加载）\n"]
+    for pattern_name in detected_patterns:
+        pattern_text = load_pattern_text(pattern_name)
+        if pattern_text:
+            parts.append(pattern_text)
+            parts.append("")  # 空行分隔
+
+    return "\n".join(parts)
+
+
+def _assemble_legacy_prompt(
+    file_path: str,
+    file_diff: str,
+    file_content: str,
+) -> str:
+    """回退到原始固定 prompt（200 行完整版）。"""
+    return render_prompt_template(
+        "intent_analysis",
+        file_path=file_path,
+        file_diff=file_diff,
+        file_content=file_content,
+    )
 
 def _normalize_line_number(v: Any) -> Any:
     """Best-effort normalization to [start, end] for RiskItem parsing."""
@@ -103,14 +161,20 @@ async def intent_analysis_node(state: ReviewState) -> Dict[str, Any]:
                 
                 # 读取文件内容
                 file_content = read_file_content(file_path, config)
-                
-                # 渲染提示模板
-                rendered_prompt = render_prompt_template(
-                    "intent_analysis",
-                    file_path=file_path,
-                    file_diff=file_diff,
-                    file_content=file_content
-                )
+
+                # 根据配置选择 prompt 组装方式
+                if _should_use_progressive_context(config):
+                    rendered_prompt = _assemble_intent_prompt(
+                        file_path=file_path,
+                        file_diff=file_diff,
+                        file_content=file_content,
+                    )
+                else:
+                    rendered_prompt = _assemble_legacy_prompt(
+                        file_path=file_path,
+                        file_diff=file_diff,
+                        file_content=file_content,
+                    )
                 
                 parser = PydanticOutputParser(pydantic_object=FileAnalysis)
                 

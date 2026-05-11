@@ -13,8 +13,16 @@ import argparse
 import json
 import re
 import sys
+import codecs
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Fix Windows console encoding issue (only if not already wrapped by main.py)
+if sys.platform == 'win32' and not hasattr(sys.stdout, '_utf8_wrapped'):
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stdout._utf8_wrapped = True
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    sys.stderr._utf8_wrapped = True
 
 # 添加项目根目录到 Python 路径
 project_root = Path(__file__).parent.parent
@@ -280,7 +288,7 @@ async def main():
     """主函数。"""
     args = parse_arguments()
     
-    print("🚀 自动化测试脚本")
+    print("[TEST] 自动化测试脚本")
     print("=" * 80)
     
     # 解析参数
@@ -311,36 +319,36 @@ async def main():
     # 如果 test_cases.json 不存在，尝试使用原始的 test_prs.json
     if not test_file.exists():
         test_file = test_dir / "test_prs.json"
-        print(f"⚠️  test_cases.json 不存在，使用原始文件 test_prs.json")
+        print(f"[WARN] test_cases.json 不存在，使用原始文件 test_prs.json")
         print(f"   提示: 运行 python test/extract_test_cases.py 生成 test_cases.json")
-    
+
     if not test_file.exists():
-        print(f"❌ 测试文件不存在: {test_file}")
+        print(f"[ERROR] 测试文件不存在: {test_file}")
         return 1
-    
-    print(f"📁 数据集目录: {datasets_dir}")
-    print(f"📄 测试文件: {test_file}")
-    print(f"💡 注意: 结果文件将自动保存到 log 目录")
-    
-    print("\n📖 加载测试用例...")
+
+    print(f"[INFO] 数据集目录: {datasets_dir}")
+    print(f"[INFO] 测试文件: {test_file}")
+    print(f"[INFO] 注意: 结果文件将自动保存到 log 目录")
+
+    print("\n[INFO] 加载测试用例...")
     try:
         test_data = load_test_cases(test_file)
         all_cases = collect_all_cases(test_data)
         filtered_cases = filter_cases(all_cases, repos=repos, cases_range=cases_range)
-        
-        print(f"✅ 加载完成: 总共 {len(all_cases)} 个用例，过滤后 {len(filtered_cases)} 个用例")
+
+        print(f"[OK] 加载完成: 总共 {len(all_cases)} 个用例，过滤后 {len(filtered_cases)} 个用例")
     except Exception as e:
-        print(f"❌ 加载测试用例失败: {e}")
+        print(f"[ERROR] 加载测试用例失败: {e}")
         import traceback
         traceback.print_exc()
         return 1
-    
+
     if not filtered_cases:
-        print("⚠️  没有符合条件的测试用例")
+        print("[WARN] 没有符合条件的测试用例")
         return 0
-    
+
     # 运行测试（顺序执行，不并行）
-    print(f"\n🧪 开始运行 {len(filtered_cases)} 个测试用例（顺序执行）...")
+    print(f"\n[TEST] 开始运行 {len(filtered_cases)} 个测试用例（顺序执行）...")
     
     results = {
         "success": [],
@@ -363,26 +371,26 @@ async def main():
         if success:
             results["success"].append((case["case_name"], message))
             if not args.quiet:
-                print(f"✅ {message}")
+                print(f"[OK] {message}")
         else:
             results["failed"].append((case["case_name"], message))
             if not args.quiet:
-                print(f"❌ {message}")
+                print(f"[FAIL] {message}")
     
     # 生成测试报告
     print("\n" + "=" * 80)
-    print("📊 测试报告")
+    print("[REPORT] 测试报告")
     print("=" * 80)
-    print(f"✅ 成功: {len(results['success'])}")
-    print(f"❌ 失败: {len(results['failed'])}")
-    print(f"⏭️  跳过: {len(results['skipped'])}")
+    print(f"[OK] 成功: {len(results['success'])}")
+    print(f"[FAIL] 失败: {len(results['failed'])}")
+    print(f"[SKIP] 跳过: {len(results['skipped'])}")
     
     if results["failed"]:
         print("\n失败的用例:")
         for case_name, message in results["failed"]:
             print(f"  - {case_name}: {message}")
     
-    print(f"\n💾 结果文件保存在: log 目录（由 main.py 自动生成）")
+    print(f"\n[INFO] 结果文件保存在: log 目录（由 main.py 自动生成）")
     
     return 0 if len(results["failed"]) == 0 else 1
 

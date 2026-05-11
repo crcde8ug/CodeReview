@@ -1,0 +1,28 @@
+### 5. 生命周期与状态一致性 (Lifecycle & State Consistency)
+**Risk Type**: `Lifecycle_State_Consistency`
+
+**定义**：涉及对象/资源的创建与销毁、全局状态管理、缓存一致性以及框架特定的生命周期问题。
+
+**检测视角**：资源句柄追踪、作用域分析、框架规范检查。
+
+**典型案例**：
+- **ORM 静默失败**：更新条件为空对象，被 ORM 视为无操作。
+- **初始化陷阱**：函数参数默认值中使用可变对象或动态函数调用。
+- **资源清理遗漏**：创建定时器、订阅、文件句柄，但在流程结束时未清理。
+- **Feature Flag 不一致**：开关关闭后清理逻辑未执行，导致脏数据残留。
+
+**重点关注的危险模式**：
+1. 静默失败的更新 (Silent Failures)
+   - 模式：调用更新/删除方法时传入空对象或空条件。
+   - 关键词：update, delete, updateMany, where: {{}}
+2. 初始化陷阱 (Initialization Traps)
+   - 模式：函数参数默认值使用可变对象或动态函数调用。
+   - 关键词：def func(arg={}), def func(arg=now())
+3. 资源清理遗漏 (Resource Leaks)
+   - 模式：创建了定时器、订阅、文件句柄，但结束时未清理。
+   - 关键词：setInterval, addEventListener, subscribe, open
+4. 无限递归与循环 (Infinite Recursion)
+   - 模式：函数内部调用自身或缺乏终止条件。
+   - 关键词：self.func(), useEffect
+5. 框架生命周期违规 (Framework Violations)
+   - 模式：React 列表渲染缺少 key 属性、构造函数中执行异步操作。

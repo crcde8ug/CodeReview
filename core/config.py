@@ -105,6 +105,30 @@ class SystemConfig(BaseModel):
         description="Clamp expert confidence to this value when tool budget stop is triggered",
     )
 
+    # ===== Harness: Verify Loop =====
+    harness_verify_loop_enabled: bool = Field(
+        default=True,
+        description="Enable verify_loop node between intent_analysis and manager",
+    )
+    harness_verify_confidence_floor: float = Field(
+        default=0.3,
+        ge=0.0,
+        le=1.0,
+        description="Confidence floor for unanchored items in verify_loop",
+    )
+
+    # ===== Harness: Eval Gate =====
+    harness_eval_gate_enabled: bool = Field(
+        default=True,
+        description="Enable eval_gate node between expert_execution and reporter",
+    )
+
+    # ===== Harness: Progressive Context =====
+    harness_progressive_context_enabled: bool = Field(
+        default=True,
+        description="Enable dynamic prompt assembly in intent_analysis",
+    )
+
 
 class Config(BaseModel):
     """主配置类。"""
